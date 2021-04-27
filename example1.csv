@@ -1,0 +1,3 @@
+id,ftng_type,width,dead_load,live_load,conc_type,w_c,w_e,f_c,f_y,a_s_p,bottom_of_ftng,bar_coat,wall_type,width_restriction,col_loc
+wall_6_15,wall,12,6,15,nw,150,100,4000,60000,5000,4,,mason,,
+col_6_15,col,16,6,15,nw,150,100,3000,60000,5000,4,,,7,center

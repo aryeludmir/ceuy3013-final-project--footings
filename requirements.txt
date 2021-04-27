@@ -1,3 +1,5 @@
 # This is a required file. All of your Python libraries with the proper versions
 # go here, each one on a new line. For example: numpy==1.19.4. Pound sign (#)
 # is a comment. Do not comment out any lines with required libraries and versions.
+
+pandas==1.2.4
