@@ -18,12 +18,15 @@ for index, row in df.iterrows():
     a_s_p = row["a_s_p"]
     bottom = row["bottom_of_ftng"]
     bar_coat = row["bar_coat"]
+    precision = row["precision"]
 
     if ftng_type == "wall":
         wall_type = row["wall_type"]
+        wall_width = width
 
         footing = WallFooting(
-            width,
+            precision,
+            wall_width,
             wall_type,
             d_l,
             l_l,
@@ -42,6 +45,7 @@ for index, row in df.iterrows():
         col_loc = row["col_loc"]
 
         footing = ColumnFooting(
+            precision,
             width,
             d_l,
             l_l,
