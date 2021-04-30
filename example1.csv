@@ -1,5 +1,5 @@
 id,ftng_type,width,dead_load,live_load,conc_type,w_c,w_e,f_c,f_y,a_s_p,bottom_of_ftng,bar_coat,wall_type,width_restriction,col_loc,precision
 wall_10_20,wall,12,10,20,nw,150,100,3000,60000,5000,4,,mason,,,0.33
-col_225_175,col,18,225,175,nw,150,100,4000,60000,5000,4,,,,center,0.5
-col_175_175_7,col,18,175,175,nw,150,100,3000,60000,5000,4,,,7,center,0.5
+col_225_175,col,18,225,175,nw,150,100,3000,60000,5000,4,,,,interior,0.5
+col_175_175_7,col,18,175,175,nw,150,100,3000,60000,5000,4,,,7,interior,0.5
 wall_6_15,wall,12,6,15,nw,150,100,3000,60000,4000,4,,concrete,,,0.5

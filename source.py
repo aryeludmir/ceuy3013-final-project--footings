@@ -39,6 +39,7 @@ class Footing:
         return (asp - (w_e * (bottom - h)) - (w_c * h)) / 1000
 
     def round_to_upper(self, x, precision):
+        """ """
         ceil = math.ceil(x)
 
         while (ceil - x) > precision:
@@ -46,7 +47,24 @@ class Footing:
         return ceil
 
     def factored_soil_pressure(slef, P, dimension):
+        """ """
         return P / dimension
+
+    def find_d(self, h, ftng_type, bar_size=8):
+        """ """
+        if ftng_type == "wall":
+            return (h * 12) - 3 - ((bar_size / 8) / 2)
+        else:
+            return (h * 12) - 3 - (bar_size / 8)
+
+    def find_lam(self, conc_type):
+        """ """
+        if conc_type == "nw":
+            return 1
+        elif conc_type == "lw":
+            return 0.75
+        elif conc_type == "s_lw":
+            return 0.85
 
 
 class WallFooting(Footing):
@@ -67,6 +85,8 @@ class WallFooting(Footing):
         w_e=100,
     ):
         self.h = 1.5  # ft
+        self.d = self.find_d(self.h, "wall")  # in
+
         self.design_wall_footing(
             precision,
             wall_width,
@@ -130,6 +150,8 @@ class ColumnFooting(Footing):
         w_e=100,
     ):
         self.h = 2  # ft.
+        self.d = self.find_d(self.h, "column")  # in
+
         self.design_column_footing(
             precision,
             width,
@@ -170,7 +192,12 @@ class ColumnFooting(Footing):
         req_area = self.find_req_area(load, net_asp)  # sqft
         req_dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
         actual_area = req_dims[0] * req_dims[1]  # sqft
+        print(actual_area)
         q_u = self.factored_soil_pressure(factored_load, actual_area)  # ksf
+        print(q_u)
+        self.check_two_way_shear(
+            q_u, actual_area, width, self.d, f_c, col_loc, conc_type
+        )
 
     def find_req_area(self, load, net_asp):
         """returns required area for column footing rounded up to the nearest inch"""
@@ -185,3 +212,30 @@ class ColumnFooting(Footing):
         else:
             long_side = self.round_to_upper((area / max_width), precision)
             return (max_width, long_side)
+
+    def check_two_way_shear(self, q_u, area, width, d, f_c, col_loc, conc_type):
+        """ """
+        a = width + d  # in.
+        b_0 = 4 * a  # in.
+
+        v_u = q_u * (area - ((a / 12) ** 2))  # kip
+
+        lam = self.find_lam(conc_type)
+        alpha_s = self.find_alpha_s(col_loc)
+
+        v_ca = 4 * lam * math.sqrt(f_c) * b_0 * d
+        v_cb = (
+            6 * lam * math.sqrt(f_c) * b_0 * d
+        )  # modified because large/small will always be 1 for square column
+        v_cc = (((alpha_s * d) / b_0) + 2) * lam * math.sqrt(f_c) * b_0 * d
+
+        phi_vn = 0.75 * min(v_ca, v_cb, v_cc) / 1000  # kip
+
+    def find_alpha_s(self, col_loc):
+        """ """
+        if col_loc == "interior":
+            return 40
+        elif col_loc == "edge":
+            return 30
+        elif col_loc == "corner":
+            return 20
