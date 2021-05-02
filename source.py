@@ -38,7 +38,7 @@ class Footing:
         """Returns the net allowable soil pressure in ksf"""
         return (asp - (w_e * (bottom - h)) - (w_c * h)) / 1000
 
-    def round_to_upper(self, x, precision):
+    def round_to_upper(self, x, precision=0.5):
         """ """
         ceil = math.ceil(x)
 
@@ -121,14 +121,43 @@ class WallFooting(Footing):
     ):
 
         load = d_l + l_l  # k/ft
-        factored_load = self.factor_loads(d_l, l_l)  # k/f
+        factored_load = self.factor_loads(d_l, l_l)  # k/ft
         net_asp = self.net_asp(a_s_p, w_e, w_c, self.h, bottom)  # ksf
         req_width = self.find_req_width(load, net_asp, precision)  # ft
         q_u = self.factored_soil_pressure(factored_load, req_width)  # ksf
+        check_shear = self.check_one_way_shear(
+            q_u, self.d, req_width, wall_width, f_c, conc_type
+        )
 
     def find_req_width(self, load, net_asp, precision):
         """returns required width for wall footing, rounded up to the nearest inch."""
         return self.round_to_upper((load / net_asp), precision)
+
+    def check_one_way_shear(self, q_u, d, req_width, wall_width, f_c, conc_type):
+        """ """
+        lam = self.find_lam(conc_type)
+
+        v_u = q_u * 1 * (((req_width - (wall_width / 12)) / 2) - (d / 12))  # kip
+        v_c = (2 * lam * math.sqrt(f_c) * 12 * d) / 1000  # kip
+        phi_vn = 0.75 * v_c  # kip
+
+        while phi_vn > (1.5 * v_u):
+            self.h -= 1 / 12
+            new_d = self.find_d(self.h, "wall")
+            v_u = q_u * 1 * (((req_width - (wall_width) / 12) / 2) - (new_d / 12))
+            v_c = (2 * lam * math.sqrt(f_c) * 12 * new_d) / 1000  # kip
+            phi_vn = 0.75 * v_c
+            self.d = new_d
+
+        if phi_vn < v_u:
+            self.d = self.round_to_upper(
+                (v_u * 1000 / (2 * lam * 0.75 * math.sqrt(f_c) * 12))
+            )  # in.
+            self.h = self.d + 3 + ((8 / 8) / 2)
+            v_c = (2 * lam * math.sqrt(f_c) * 12 * new_d) / 1000  # kip
+            phi_vn = 0.75 * v_c
+
+        return phi_vn
 
 
 class ColumnFooting(Footing):
@@ -192,11 +221,12 @@ class ColumnFooting(Footing):
         req_area = self.find_req_area(load, net_asp)  # sqft
         req_dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
         actual_area = req_dims[0] * req_dims[1]  # sqft
-        print(actual_area)
         q_u = self.factored_soil_pressure(factored_load, actual_area)  # ksf
-        print(q_u)
-        self.check_two_way_shear(
+        two_way_shear = self.check_two_way_shear(
             q_u, actual_area, width, self.d, f_c, col_loc, conc_type
+        )
+        one_way_shear = self.check_one_way_shear(
+            q_u, req_dims, width, self.d, f_c, conc_type
         )
 
     def find_req_area(self, load, net_asp):
@@ -217,19 +247,43 @@ class ColumnFooting(Footing):
         """ """
         a = width + d  # in.
         b_0 = 4 * a  # in.
-
         v_u = q_u * (area - ((a / 12) ** 2))  # kip
+        v_c = self.aci_sec22_6_5_2(d, b_0, f_c, conc_type, col_loc)  # kip
+        phi_vn = 0.75 * v_c  # kip
+
+        while phi_vn < v_u:
+            self.h += 1 / 12
+            new_d = self.find_d(self.h, "colmumn")
+            new_a = width + new_d
+            new_b_0 = 4 * a
+            v_u = q_u * (area - ((new_a / 12) ** 2))
+            v_c = self.aci_sec22_6_5_2(new_d, new_b_0, f_c, conc_type, col_loc) / 1000
+            phi_vn = 0.75 * v_c
+            self.d = new_d
+
+        while phi_vn >= (1.5 * v_u):
+            self.h -= 1 / 12
+            new_d = self.find_d(self.h, "colmumn")
+            new_a = width + new_d
+            new_b_0 = 4 * a
+            v_u = q_u * (area - ((new_a / 12) ** 2))
+            v_c = self.aci_sec22_6_5_2(new_d, new_b_0, f_c, conc_type, col_loc) / 1000
+            phi_vn = 0.75 * v_c
+            self.d = new_d
+
+        return phi_vn
+
+    def aci_sec22_6_5_2(self, d, b_0, f_c, conc_type, col_loc):
+        """ """
 
         lam = self.find_lam(conc_type)
         alpha_s = self.find_alpha_s(col_loc)
 
-        v_ca = 4 * lam * math.sqrt(f_c) * b_0 * d
-        v_cb = (
-            6 * lam * math.sqrt(f_c) * b_0 * d
-        )  # modified because large/small will always be 1 for square column
-        v_cc = (((alpha_s * d) / b_0) + 2) * lam * math.sqrt(f_c) * b_0 * d
+        v_ca = (4 * lam * math.sqrt(f_c) * b_0 * d) / 1000
+        v_cb = (6 * lam * math.sqrt(f_c) * b_0 * d) / 1000
+        v_cc = ((((alpha_s * d) / b_0) + 2) * lam * math.sqrt(f_c) * b_0 * d) / 1000
 
-        phi_vn = 0.75 * min(v_ca, v_cb, v_cc) / 1000  # kip
+        return min(v_ca, v_cb, v_cc)
 
     def find_alpha_s(self, col_loc):
         """ """
@@ -239,3 +293,38 @@ class ColumnFooting(Footing):
             return 30
         elif col_loc == "corner":
             return 20
+
+    def check_one_way_shear(self, q_u, dims, col_size, d, f_c, conc_type):
+        """ """
+        lam = self.find_lam(conc_type)
+        v_u = q_u * dims[0] * ((dims[1] - (col_size / 12)) / 2 - (d / 12))  # kip
+        v_c = (2 * lam * math.sqrt(f_c) * (dims[0] * 12) * d) / 1000  # kip
+
+        phi_vn = 0.75 * v_c  # kip
+
+        while phi_vn > (1.5 * v_u):
+            self.h -= 1 / 12
+            new_d = self.find_d(self.h, "column")
+            v_u = q_u * dims[0] * ((dims[1] - col_size) / (12 * 2) - (new_d / 12))
+            v_c = (2 * lam * math.sqrt(f_c) * (dims[0] * 12) * new_d) / 1000  # kip
+            phi_vn = 0.75 * v_c
+            self.d = new_d
+
+        if phi_vn < v_u:
+            self.d = self.round_to_upper(
+                (v_u * 1000 / (2 * lam * 0.75 * math.sqrt(f_c) * dims[0] * 12))
+            )  # in.
+            self.h = self.d + 3 + (8 / 8)
+            v_c = (2 * lam * math.sqrt(f_c) * (dims[0] * 12) * self.d) / 1000  # kip
+            phi_vn = 0.75 * v_c
+
+        return phi_vn
+
+    # def get_func(name):
+    #     """ """
+    #     if name == "v_ca":
+    #         return (4 * lam * math.sqrt(f_c) * b_0 * d) / 1000
+    #     elif name == "v_cb":
+    #         return (6 * lam * math.sqrt(f_c) * b_0 * d) / 1000
+    #     elif name == "v_cc":
+    #         return ((((alpha_s * d) / b_0) + 2) * lam * math.sqrt(f_c) * b_0 * d) / 1000
