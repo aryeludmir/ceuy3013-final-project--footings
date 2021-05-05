@@ -2,7 +2,7 @@ import pandas as pd
 from source import WallFooting, ColumnFooting
 import math
 
-df = pd.read_csv("example1.csv")
+df = pd.read_csv("input/example1.csv")
 print(df.head())
 
 for index, row in df.iterrows():

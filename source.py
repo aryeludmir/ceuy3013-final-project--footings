@@ -2,12 +2,19 @@ import math
 
 
 class Footing:
-    def __init__(self, f_c, w_c, conc_type, grade):
+    def __init__(self, f_c, w_c, conc_type, grade, ftng_type):
         self.f_c = f_c
         self.w_c = w_c
         self.lam = self.get_lam(conc_type)
         self.beta_1 = self.get_beta_1(f_c)
         self.f_y, self.epsilon_y = self.get_steel_props(grade)
+
+        if ftng_type == "wall":
+            self.h = 1.5  # ft
+            self.d = self.get_d("wall")  # in
+        elif ftng_type == "column":
+            self.h = 2  # ft
+            self.d = self.get_d("column")  # in
 
     def get_lam(self, conc_type):
         """ """
@@ -35,12 +42,12 @@ class Footing:
         elif grade == 75:
             return (75000, 0.00259)
 
-    def get_d(self, h, ftng_type, bar_size=8):
+    def get_d(self, ftng_type, bar_size=8):
         """ """
         if ftng_type == "wall":
-            return (h * 12) - 3 - ((bar_size / 8) / 2)
+            return (self.h * 12) - 3 - ((bar_size / 8) / 2)
         else:
-            return (h * 12) - 3 - (bar_size / 8)
+            return (self.h * 12) - 3 - (bar_size / 8)
 
     def factor_loads(self, d_l, l_l):
         """Calculates the minimum design load by multiplying service loads by given factors (ACI Section 5.3.1).
@@ -49,9 +56,9 @@ class Footing:
         """
         return (1.2 * d_l) + (1.6 * l_l)
 
-    def net_asp(self, asp, w_e, h, bottom):
+    def net_asp(self, asp, w_e, bottom):
         """Returns the net allowable soil pressure in ksf"""
-        return (asp - (w_e * (bottom - h)) - (self.w_c * h)) / 1000
+        return (asp - (w_e * (bottom - self.h)) - (self.w_c * self.h)) / 1000
 
     def round_to_upper(self, x, precision=0.5):
         """ """
@@ -89,9 +96,9 @@ class Footing:
         elif wall_type == "concrete":
             return (ftng_width - (width / 12)) / 2
 
-    def get_k_bar(self, m_u, phi, b, d):
+    def get_k_bar(self, m_u, phi, b):
         """ """
-        return m_u * 12 / (phi * b * (d ** 2))
+        return m_u * 12 / (phi * b * (self.d ** 2))
 
     def get_rho(self, k_bar):
         """ """
@@ -104,7 +111,7 @@ class Footing:
         phi = self.get_phi(epsilon_t)
 
         if phi < 0.9:
-            k_bar = self.get_k_bar(m_u, phi, b, d)
+            k_bar = self.get_k_bar(m_u, phi, b)
             c = -k_bar * 1000
             rho = (-b + math.sqrt((b ** 2) - (4 * a * c))) / (2 * a)
 
@@ -125,7 +132,7 @@ class Footing:
                 (0.25 / (0.005 - self.epsilon_y)) * (epsilon_t - self.epsilon_y)
             )
 
-    def get_reqd_area(self, rho, b, d):
+    def get_reqd_area(self, rho, b):
         """Calculates the minimum flexural reinforcement required by analysis (ACI Section 9.6.1.1)
 
         rho = ratio of tension steel area to effective concrete area
@@ -133,25 +140,25 @@ class Footing:
         d = effective depth of steel
         """
 
-        return rho * b * d
+        return rho * b * self.d
 
-    def get_min_beam(self, b, d):
+    def get_min_beam(self, b):
         """Calculates the minimum flexural reinforcement for nonprestressed beams
         as required by ACI Section 9.6.1.2
         """
-        a = (3 * math.sqrt(self.f_c) / self.f_y) * b * d
-        b = (200 / self.f_y) * b * d
+        a = (3 * math.sqrt(self.f_c) / self.f_y) * b * self.d
+        b = (200 / self.f_y) * b * self.d
         min_area_beam = max(a, b)
 
         return min_area_beam
 
-    def get_min_slab(self, b, h):
+    def get_min_slab(self, b):
         """ """
         if self.f_y < 60000:
-            return 0.0020 * b * h * 12
+            return 0.0020 * b * self.h * 12
         else:
-            a = ((0.0018 * 60000) / self.f_y) * b * h * 12
-            b = 0.0014 * b * h
+            a = ((0.0018 * 60000) / self.f_y) * b * self.h * 12
+            b = 0.0014 * b * self.h
             min_area_slab = max(a, b)
             return min_area_slab
 
@@ -159,10 +166,10 @@ class Footing:
         """ """
         return (4 / 3) * reqd_area
 
-    def get_min_area(self, b, d, h, reqd_area):
+    def get_min_area(self, b, reqd_area):
         """ """
-        min_area_beam = self.get_min_beam(b, d)
-        min_area_slab = self.get_min_slab(b, h)
+        min_area_beam = self.get_min_beam(b)
+        min_area_slab = self.get_min_slab(b)
         sec_9_6_1_3 = self.aci_sec9_6_1_3(reqd_area)
 
         return max(min(min_area_beam, sec_9_6_1_3), min_area_slab)
@@ -185,9 +192,7 @@ class WallFooting(Footing):
         w_c,
         w_e,
     ):
-        super().__init__(f_c, w_c, conc_type, grade)
-        self.h = 1.5  # ft
-        self.d = self.get_d(self.h, "wall")  # in
+        super().__init__(f_c, w_c, conc_type, grade, "wall")
 
         self.design_wall_footing(
             precision,
@@ -215,15 +220,15 @@ class WallFooting(Footing):
     ):
         load = d_l + l_l  # k/ft
         factored_load = self.factor_loads(d_l, l_l)  # k/ft
-        net_asp = self.net_asp(a_s_p, w_e, self.h, bottom)  # ksf
+        net_asp = self.net_asp(a_s_p, w_e, bottom)  # ksf
         req_width = self.find_req_width(load, net_asp, precision)  # ft
         q_u = self.factored_soil_pressure(factored_load, req_width)  # ksf
         phi_vn = self.check_one_way_shear(q_u, req_width, wall_width)
         m_u = self.get_moment(q_u, req_width, wall_width, wall_type)
-        k_bar = self.get_k_bar(m_u, 0.9, 12, self.d)
+        k_bar = self.get_k_bar(m_u, 0.9, 12)
         rho = self.get_rho(k_bar)
-        reqd_area = self.get_reqd_area(rho, 12, self.d)
-        min_area = self.get_min_area(12, self.d, self.h, reqd_area)
+        reqd_area = self.get_reqd_area(rho, 12)
+        min_area = self.get_min_area(12, reqd_area)
 
         print(net_asp, req_width, q_u, phi_vn, m_u, k_bar, rho, reqd_area, min_area)
 
@@ -239,7 +244,7 @@ class WallFooting(Footing):
 
         while phi_vn > (1.5 * v_u):
             self.h -= 1 / 12
-            new_d = self.get_d(self.h, "wall")
+            new_d = self.get_d("wall")
             v_u = q_u * 1 * (((req_width - (wall_width) / 12) / 2) - (new_d / 12))
             v_c = (2 * self.lam * math.sqrt(self.f_c) * 12 * new_d) / 1000  # kip
             phi_vn = 0.75 * v_c
@@ -274,9 +279,7 @@ class ColumnFooting(Footing):
         w_c,
         w_e,
     ):
-        super().__init__(f_c, w_c, conc_type, grade)
-        self.h = 2  # ft.
-        self.d = self.get_d(self.h, "column")  # in
+        super().__init__(f_c, w_c, conc_type, grade, "column")
 
         self.design_column_footing(
             precision,
@@ -306,15 +309,13 @@ class ColumnFooting(Footing):
     ):
         load = d_l + l_l  # kip
         factored_load = self.factor_loads(d_l, l_l)  # kip
-        net_asp = self.net_asp(a_s_p, w_e, self.h, bottom)  # ksf
+        net_asp = self.net_asp(a_s_p, w_e, bottom)  # ksf
         req_area = self.find_req_area(load, net_asp)  # sqft
         req_dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
         actual_area = req_dims[0] * req_dims[1]  # sqft
         q_u = self.factored_soil_pressure(factored_load, actual_area)  # ksf
-        two_way_shear = self.check_two_way_shear(
-            q_u, actual_area, width, self.d, col_loc
-        )
-        one_way_shear = self.check_one_way_shear(q_u, req_dims, width, self.d)
+        two_way_shear = self.check_two_way_shear(q_u, actual_area, width, col_loc)
+        one_way_shear = self.check_one_way_shear(q_u, req_dims, width)
         print(
             net_asp, req_area, req_dims, actual_area, q_u, two_way_shear, one_way_shear
         )
@@ -333,44 +334,50 @@ class ColumnFooting(Footing):
             side = self.round_to_upper(math.sqrt(area), precision)
             return (side, side)
 
-    def check_two_way_shear(self, q_u, area, width, d, col_loc):
+    def check_two_way_shear(self, q_u, area, width, col_loc):
         """ """
-        a = width + d  # in.
-        b_0 = 4 * a  # in.
-        v_u = q_u * (area - ((a / 12) ** 2))  # kip
-        v_c = self.aci_sec22_6_5_2(d, b_0, col_loc)  # kip
-        phi_vn = 0.75 * v_c  # kip
+
+        def v_u(self, width, q_u, area):
+            a = width + self.d  # in.
+            v_u = q_u * (area - ((a / 12) ** 2))  # kip
+            return v_u
+
+        def phi_vn(self, width, col_loc):
+            a = width + self.d
+            b_0 = 4 * a  # in.
+            v_c = self.aci_sec22_6_5_2(b_0, col_loc)  # kip
+            phi_vn = 0.75 * v_c  # kip
+            return phi_vn
+
+        v_u = v_u(self, width, q_u, area)  # kip
+        phi_vn = phi_vn(self, width, col_loc)  # kip
 
         while phi_vn < v_u:
             self.h += 1 / 12
-            new_d = self.get_d(self.h, "colmumn")
-            new_a = width + new_d
-            new_b_0 = 4 * a
-            v_u = q_u * (area - ((new_a / 12) ** 2))
-            v_c = self.aci_sec22_6_5_2(new_d, new_b_0, col_loc) / 1000
-            phi_vn = 0.75 * v_c
-            self.d = new_d
+            self.d = self.get_d(self.h, "colmumn")
+            v_u = v_u(self, width, q_u, area)  # kip
+            phi_vn = phi_vn(self, width, col_loc)  # kip
 
         while phi_vn >= (1.5 * v_u):
             self.h -= 1 / 12
-            new_d = self.get_d(self.h, "colmumn")
-            new_a = width + new_d
-            new_b_0 = 4 * a
-            v_u = q_u * (area - ((new_a / 12) ** 2))
-            v_c = self.aci_sec22_6_5_2(new_d, new_b_0, col_loc) / 1000
-            phi_vn = 0.75 * v_c
-            self.d = new_d
+            self.d = self.get_d(self.h, "colmumn")
+            v_u = v_u(self, width, q_u, area)  # kip
+            phi_vn = phi_vn(self, width, col_loc)  # kip
 
         return phi_vn
 
-    def aci_sec22_6_5_2(self, d, b_0, col_loc):
+    def aci_sec22_6_5_2(self, b_0, col_loc):
         """ """
         alpha_s = self.find_alpha_s(col_loc)
 
-        v_ca = (4 * self.lam * math.sqrt(self.f_c) * b_0 * d) / 1000
-        v_cb = (6 * self.lam * math.sqrt(self.f_c) * b_0 * d) / 1000
+        v_ca = (4 * self.lam * math.sqrt(self.f_c) * b_0 * self.d) / 1000
+        v_cb = (6 * self.lam * math.sqrt(self.f_c) * b_0 * self.d) / 1000
         v_cc = (
-            (((alpha_s * d) / b_0) + 2) * self.lam * math.sqrt(self.f_c) * b_0 * d
+            (((alpha_s * self.d) / b_0) + 2)
+            * self.lam
+            * math.sqrt(self.f_c)
+            * b_0
+            * self.d
         ) / 1000
 
         return min(v_ca, v_cb, v_cc)
@@ -384,22 +391,23 @@ class ColumnFooting(Footing):
         elif col_loc == "corner":
             return 20
 
-    def check_one_way_shear(self, q_u, dims, col_size, d):
+    def check_one_way_shear(self, q_u, dims, col_size):
         """ """
-        v_u = q_u * dims[0] * ((dims[1] - (col_size / 12)) / 2 - (d / 12))  # kip
-        v_c = (2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * d) / 1000  # kip
+        v_u = q_u * dims[0] * ((dims[1] - (col_size / 12)) / 2 - (self.d / 12))  # kip
+        v_c = (
+            2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * self.d
+        ) / 1000  # kip
 
         phi_vn = 0.75 * v_c  # kip
 
         while phi_vn > (1.5 * v_u):
             self.h -= 1 / 12
-            new_d = self.get_d(self.h, "column")
-            v_u = q_u * dims[0] * ((dims[1] - col_size) / (12 * 2) - (new_d / 12))
+            self.d = self.get_d(self.h, "column")
+            v_u = q_u * dims[0] * ((dims[1] - col_size) / (12 * 2) - (self.d / 12))
             v_c = (
-                2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * new_d
+                2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * self.d
             ) / 1000  # kip
             phi_vn = 0.75 * v_c
-            self.d = new_d
 
         if phi_vn < v_u:
             self.d = self.round_to_upper(
