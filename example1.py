@@ -1,5 +1,6 @@
 import pandas as pd
 from source import WallFooting, ColumnFooting
+import math
 
 df = pd.read_csv("example1.csv")
 print(df.head())
@@ -10,15 +11,23 @@ for index, row in df.iterrows():
     width = row["width"]
     d_l = row["dead_load"]
     l_l = row["live_load"]
-    conc_type = row["conc_type"]
-    w_c = row["w_c"]
-    w_e = row["w_e"]
     f_c = row["f_c"]
-    f_y = row["f_y"]
+    grade = row["grade"]
     a_s_p = row["a_s_p"]
-    bottom = row["bottom_of_ftng"]
-    bar_coat = row["bar_coat"]
-    precision = row["precision"]
+    w_c = 150 if math.isnan(row["w_c"]) else row["w_c"]
+    w_e = 100 if math.isnan(row["w_e"]) else row["w_e"]
+    bottom = 4 if math.isnan(row["bottom_of_ftng"]) else row["bottom_of_ftng"]
+    precision = 0.5 if math.isnan(row["precision"]) else row["precision"]
+    bar_coat = (
+        None
+        if type(row["bar_coat"]) is float and math.isnan(row["bar_coat"])
+        else row["bar_coat"]
+    )
+    conc_type = (
+        "nw"
+        if type(row["conc_type"]) is float and math.isnan(row["conc_type"])
+        else row["conc_type"]
+    )
 
     if ftng_type == "wall":
         wall_type = row["wall_type"]
@@ -31,7 +40,7 @@ for index, row in df.iterrows():
             d_l,
             l_l,
             f_c,
-            f_y,
+            grade,
             a_s_p,
             bottom,
             bar_coat,
@@ -41,16 +50,23 @@ for index, row in df.iterrows():
         )
 
     else:
-        max_width = row["width_restriction"]
-        col_loc = row["col_loc"]
+        max_width = (
+            None if math.isnan(row["width_restriction"]) else row["width_restriction"]
+        )
+        col_loc = (
+            "center"
+            if type(row["col_loc"]) is float and math.isnan(row["col_loc"])
+            else row["col_loc"]
+        )
+        col_width = width
 
         footing = ColumnFooting(
             precision,
-            width,
+            col_width,
             d_l,
             l_l,
             f_c,
-            f_y,
+            grade,
             a_s_p,
             bottom,
             max_width,
@@ -61,4 +77,4 @@ for index, row in df.iterrows():
             w_e,
         )
 
-    print(footing)
+print(footing)
