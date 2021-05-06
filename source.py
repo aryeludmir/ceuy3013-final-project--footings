@@ -60,7 +60,7 @@ class Footing:
         """Returns the net allowable soil pressure in ksf"""
         return (asp - (w_e * (bottom - self.h)) - (self.w_c * self.h)) / 1000
 
-    def round_to_upper(self, x, precision=0.5):
+    def round_up_to_precision(self, x, precision=0.5):
         """ """
         ceil = math.ceil(x)
         temp1 = ceil
@@ -74,7 +74,7 @@ class Footing:
 
         return min(temp1, temp2)
 
-    def round(self, x, n):
+    def round_up(self, x, n):
         """ """
         x = x * 10 ** n
         ceil = math.ceil(x)
@@ -115,7 +115,7 @@ class Footing:
             c = -k_bar * 1000
             rho = (-b + math.sqrt((b ** 2) - (4 * a * c))) / (2 * a)
 
-        return self.round(rho, 4)
+        return self.round_up(rho, 4)
 
     def get_epsilon_t(self, rho):
         """ """
@@ -193,6 +193,8 @@ class WallFooting(Footing):
         w_e,
     ):
         super().__init__(f_c, w_c, conc_type, grade, "wall")
+        self.width = 0
+        self.min_steel_area = 0
 
         self.design_wall_footing(
             precision,
@@ -221,20 +223,30 @@ class WallFooting(Footing):
         load = d_l + l_l  # k/ft
         factored_load = self.factor_loads(d_l, l_l)  # k/ft
         net_asp = self.net_asp(a_s_p, w_e, bottom)  # ksf
-        req_width = self.find_req_width(load, net_asp, precision)  # ft
-        q_u = self.factored_soil_pressure(factored_load, req_width)  # ksf
-        phi_vn = self.check_one_way_shear(q_u, req_width, wall_width)
-        m_u = self.get_moment(q_u, req_width, wall_width, wall_type)
+        self.width = self.find_req_width(load, net_asp, precision)  # ft
+        q_u = self.factored_soil_pressure(factored_load, self.width)  # ksf
+        phi_vn = self.check_one_way_shear(q_u, self.width, wall_width)
+        m_u = self.get_moment(q_u, self.width, wall_width, wall_type)
         k_bar = self.get_k_bar(m_u, 0.9, 12)
         rho = self.get_rho(k_bar)
         reqd_area = self.get_reqd_area(rho, 12)
-        min_area = self.get_min_area(12, reqd_area)
+        self.min_steel_area = self.get_min_area(12, reqd_area)
 
-        print(net_asp, req_width, q_u, phi_vn, m_u, k_bar, rho, reqd_area, min_area)
+        print(
+            net_asp,
+            self.width,
+            q_u,
+            phi_vn,
+            m_u,
+            k_bar,
+            rho,
+            reqd_area,
+            self.min_steel_area,
+        )
 
     def find_req_width(self, load, net_asp, precision):
         """returns required width for wall footing, rounded up to the nearest inch."""
-        return self.round_to_upper((load / net_asp), precision)
+        return self.round_up_to_precision((load / net_asp), precision)
 
     def check_one_way_shear(self, q_u, req_width, wall_width):
         """ """
@@ -251,7 +263,7 @@ class WallFooting(Footing):
             self.d = new_d
 
         if phi_vn < v_u:
-            self.d = self.round_to_upper(
+            self.d = self.round_up_to_precision(
                 (v_u * 1000 / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * 12))
             )  # in.
             self.h = self.d + 3 + ((8 / 8) / 2)
@@ -260,12 +272,17 @@ class WallFooting(Footing):
 
         return phi_vn
 
+    def __str__(self):
+        """ """
+        return f"Footing width: {self.width} ft, Depth: {round(self.h, 2)} ft, Minimum Required Steel: {round(self.min_steel_area, 2)} sqin/ft"
+
 
 class ColumnFooting(Footing):
     def __init__(
         self,
         precision,
         width,
+        length,
         d_l,
         l_l,
         f_c,
@@ -280,10 +297,15 @@ class ColumnFooting(Footing):
         w_e,
     ):
         super().__init__(f_c, w_c, conc_type, grade, "column")
+        self.dimensions = 0
+        self.length_reqd_area = 0
+        self.width_reqd_area = 0
+        self.bearing_strength = 0
 
         self.design_column_footing(
             precision,
             width,
+            length,
             d_l,
             l_l,
             a_s_p,
@@ -298,6 +320,7 @@ class ColumnFooting(Footing):
         self,
         precision,
         width,
+        length,
         d_l,
         l_l,
         a_s_p,
@@ -311,13 +334,13 @@ class ColumnFooting(Footing):
         factored_load = self.factor_loads(d_l, l_l)  # kip
         net_asp = self.net_asp(a_s_p, w_e, bottom)  # ksf
         req_area = self.find_req_area(load, net_asp)  # sqft
-        req_dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
-        actual_area = req_dims[0] * req_dims[1]  # sqft
+        self.dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
+        actual_area = self.dims[0] * self.dims[1]  # sqft
         q_u = self.factored_soil_pressure(factored_load, actual_area)  # ksf
         two_way_shear = self.check_two_way_shear(q_u, actual_area, width, col_loc)
-        one_way_shear = self.check_one_way_shear(q_u, req_dims, width)
+        one_way_shear = self.check_one_way_shear(q_u, self.dims, width)
         print(
-            net_asp, req_area, req_dims, actual_area, q_u, two_way_shear, one_way_shear
+            net_asp, req_area, self.dims, actual_area, q_u, two_way_shear, one_way_shear
         )
 
     def find_req_area(self, load, net_asp):
@@ -328,10 +351,10 @@ class ColumnFooting(Footing):
         """returns footing dimensions"""
 
         if max_width:
-            long_side = self.round_to_upper((area / max_width), precision)
+            long_side = self.round_up_to_precision((area / max_width), precision)
             return (max_width, long_side)
         else:
-            side = self.round_to_upper(math.sqrt(area), precision)
+            side = self.round_up_to_precision(math.sqrt(area), precision)
             return (side, side)
 
     def check_two_way_shear(self, q_u, area, width, col_loc):
@@ -410,7 +433,7 @@ class ColumnFooting(Footing):
             phi_vn = 0.75 * v_c
 
         if phi_vn < v_u:
-            self.d = self.round_to_upper(
+            self.d = self.round_up_to_precision(
                 (
                     v_u
                     * 1000
