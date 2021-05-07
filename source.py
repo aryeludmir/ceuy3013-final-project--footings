@@ -84,18 +84,6 @@ class Footing:
         """ """
         return P / dimension
 
-    def get_moment(self, q_u, req_width, width, wall_type):
-        """ """
-        l = self.critical_length(req_width, width, wall_type)  # ft
-        return q_u * l ** 2 / 2
-
-    def critical_length(self, ftng_width, width, wall_type=None):
-        """ """
-        if wall_type == "masonry":
-            return (ftng_width - (width / 12)) / 2 + (0.25 * width / 12)
-        elif wall_type == "concrete":
-            return (ftng_width - (width / 12)) / 2
-
     def get_k_bar(self, m_u, phi, b):
         """ """
         return m_u * 12 / (phi * b * (self.d ** 2))
@@ -226,7 +214,7 @@ class WallFooting(Footing):
         self.width = self.find_req_width(load, net_asp, precision)  # ft
         q_u = self.factored_soil_pressure(factored_load, self.width)  # ksf
         phi_vn = self.check_one_way_shear(q_u, self.width, wall_width)
-        m_u = self.get_moment(q_u, self.width, wall_width, wall_type)
+        m_u = self.get_moment(q_u, wall_width, wall_type)
         k_bar = self.get_k_bar(m_u, 0.9, 12)
         rho = self.get_rho(k_bar)
         reqd_area = self.get_reqd_area(rho, 12)
@@ -266,11 +254,25 @@ class WallFooting(Footing):
             self.d = self.round_up_to_precision(
                 (v_u * 1000 / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * 12))
             )  # in.
-            self.h = self.d + 3 + ((8 / 8) / 2)
+            self.h = (self.d + 3 + ((8 / 8) / 2)) / 12
             v_c = (2 * self.lam * math.sqrt(self.f_c) * 12 * new_d) / 1000  # kip
             phi_vn = 0.75 * v_c
 
         return phi_vn
+
+    def get_moment(self, q_u, wall_width, wall_type):
+        """ """
+
+        def critical_length(self, wall_width, wall_type):
+            """ """
+            if wall_type == "masonry":
+                return (self.width - (wall_width / 12)) / 2 + (0.25 * wall_width / 12)
+            elif wall_type == "concrete":
+                return (self.width - (wall_width / 12)) / 2
+
+        l = critical_length(self, wall_width, wall_type)  # ft
+
+        return q_u * l ** 2 / 2
 
     def __str__(self):
         """ """
@@ -281,8 +283,8 @@ class ColumnFooting(Footing):
     def __init__(
         self,
         precision,
-        width,
-        length,
+        col_width,
+        col_length,  # this is a feature to be added
         d_l,
         l_l,
         f_c,
@@ -297,15 +299,17 @@ class ColumnFooting(Footing):
         w_e,
     ):
         super().__init__(f_c, w_c, conc_type, grade, "column")
-        self.dimensions = 0
+        self.dims = 0
         self.length_reqd_area = 0
         self.width_reqd_area = 0
         self.bearing_strength = 0
+        self.min_steel_area_short = 0
+        self.min_steel_area = 0
 
         self.design_column_footing(
             precision,
-            width,
-            length,
+            col_width,
+            col_length,
             d_l,
             l_l,
             a_s_p,
@@ -319,8 +323,8 @@ class ColumnFooting(Footing):
     def design_column_footing(
         self,
         precision,
-        width,
-        length,
+        col_width,
+        col_length,
         d_l,
         l_l,
         a_s_p,
@@ -337,10 +341,43 @@ class ColumnFooting(Footing):
         self.dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
         actual_area = self.dims[0] * self.dims[1]  # sqft
         q_u = self.factored_soil_pressure(factored_load, actual_area)  # ksf
-        two_way_shear = self.check_two_way_shear(q_u, actual_area, width, col_loc)
-        one_way_shear = self.check_one_way_shear(q_u, self.dims, width)
+        two_way_shear = self.check_two_way_shear(q_u, actual_area, col_width, col_loc)
+        one_way_shear = self.check_one_way_shear(q_u, self.dims, col_width)
+        m_u = self.get_m_u(q_u, self.dims, col_width)
+        k_bar = self.get_k_bar(m_u, 0.9, min(self.dims) * 12)
+        rho = self.get_rho(k_bar)
+        reqd_area = self.get_reqd_area(rho, min(self.dims) * 12)
+        self.min_steel_area = self.get_min_area(min(self.dims) * 12, reqd_area)
+
+        if self.dims[0] != self.dims[1]:
+            short_mu = self.get_short_mu(q_u, self.dims, col_width)
+            short_k_bar = self.get_k_bar(short_mu, 0.9, max(self.dims) * 12)
+            short_rho = self.get_rho(short_k_bar)
+            short_reqd_area = self.get_reqd_area(short_rho, max(self.dims) * 12)
+            self.min_steel_area_short = self.get_min_area(
+                max(self.dims) * 12, short_reqd_area
+            )
+            print(
+                short_mu,
+                short_k_bar,
+                short_rho,
+                short_reqd_area,
+                self.min_steel_area_short,
+            )
+
         print(
-            net_asp, req_area, self.dims, actual_area, q_u, two_way_shear, one_way_shear
+            net_asp,
+            req_area,
+            self.dims,
+            actual_area,
+            q_u,
+            two_way_shear,
+            one_way_shear,
+            m_u,
+            k_bar,
+            rho,
+            reqd_area,
+            self.min_steel_area,
         )
 
     def find_req_area(self, load, net_asp):
@@ -440,10 +477,24 @@ class ColumnFooting(Footing):
                     / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * dims[0] * 12)
                 )
             )  # in.
-            self.h = self.d + 3 + (8 / 8)
+            self.h = (self.d + 3 + (8 / 8)) / 12
             v_c = (
                 2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * self.d
             ) / 1000  # kip
             phi_vn = 0.75 * v_c
 
         return phi_vn
+
+    def get_m_u(self, q_u, dims, col_width):
+        """ """
+        l = (max(dims) - (col_width / 12)) / 2
+        mu = (q_u * min(dims) * l ** 2) / 2
+
+        return mu
+
+    def get_short_mu(self, q_u, dims, col_width):
+        """ """
+        l = (min(dims) - (col_width / 12)) / 2
+        mu = (q_u * max(dims) * l ** 2) / 2
+
+        return mu
