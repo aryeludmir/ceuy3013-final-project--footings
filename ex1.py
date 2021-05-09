@@ -24,6 +24,7 @@ for i in data:
     conc_type = i["conc_type"] if i["conc_type"] else "nw"
 
     log = open(f"output/{name}.txt", "w")
+    log.write(f"Footing Design for {name}\n\n")
 
     if ftng_type == "wall":
         wall_type = i["wall_type"]

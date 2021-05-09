@@ -17,7 +17,7 @@
         "wall_type": "masonry",
         "width_restriction": null,
         "col_loc": null,
-        "precision": 0.3333333
+        "precision": null
     },
     {
         "id": "wall_6_15",
@@ -37,7 +37,7 @@
         "wall_type": "concrete",
         "width_restriction": null,
         "col_loc": null,
-        "precision": 0.5
+        "precision": null
     },
     {
         "id": "col_225_175",
@@ -57,7 +57,7 @@
         "wall_type": null,
         "width_restriction": null,
         "col_loc": "interior",
-        "precision": 0.5
+        "precision": null
     },
     {
         "id": "col_175_175_7",

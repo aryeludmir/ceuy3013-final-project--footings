@@ -1,0 +1,34 @@
+[
+    {
+        "id": "wall_10_20",
+        "ftng_width_ft": 6.667,
+        "ftng_depth_ft": 1.5,
+        "min_steel_sqin/ft": 0.58
+    },
+    {
+        "id": "wall_6_15",
+        "ftng_width_ft": 6,
+        "ftng_depth_ft": 1.25,
+        "min_steel_sqin/ft": 0.44
+    },
+    {
+        "id": "col_225_175",
+        "ftng_dimensions_ft": [
+            9.5,
+            9.5
+        ],
+        "ftng_depth_ft": 2,
+        "min_steel_in_long_dim_sqin": 7.296,
+        "min_steel_in_short_dim_sqin": 7.296
+    },
+    {
+        "id": "col_175_175_7",
+        "ftng_dimensions_ft": [
+            7,
+            11.5
+        ],
+        "ftng_depth_ft": 2.083,
+        "min_steel_in_long_dim_sqin": 5.88,
+        "min_steel_in_short_dim_sqin": 6.21
+    }
+]
