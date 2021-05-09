@@ -2,11 +2,14 @@ import json
 from source import WallFooting, ColumnFooting
 import math
 
+results_list = []
+
 with open("input/ex1.json") as json_file:
     data = json.load(json_file)
 
 for i in data:
 
+    name = i["id"]
     ftng_type = i["ftng_type"]
     d_l = i["dead_load"]
     l_l = i["live_load"]
@@ -17,14 +20,18 @@ for i in data:
     w_c = i["w_c"] if i["w_c"] else 150
     w_e = i["w_e"] if i["w_e"] else 100
     bottom = i["bottom_of_ftng"] if i["bottom_of_ftng"] else 4
-    precision = i["precision"] if i["precision"] else 0.5
+    precision = i["precision"] if i["precision"] else 0.08333333333
     conc_type = i["conc_type"] if i["conc_type"] else "nw"
+
+    log = open(f"output/{name}.txt", "w")
 
     if ftng_type == "wall":
         wall_type = i["wall_type"]
         wall_width = i["width"]
 
         footing = WallFooting(
+            name,
+            log,
             precision,
             wall_width,
             wall_type,
@@ -47,6 +54,8 @@ for i in data:
         col_length = i["length"]
 
         footing = ColumnFooting(
+            name,
+            log,
             precision,
             col_width,
             col_length,
@@ -65,3 +74,8 @@ for i in data:
         )
 
     print(footing)
+
+    results_list.append(footing.get_ftng_dict())
+
+with open("output/output.json", "w") as outfile:
+    json.dump(results_list, outfile, indent=4)
