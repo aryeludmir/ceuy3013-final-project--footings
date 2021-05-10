@@ -51,7 +51,7 @@
         "wall_type": null,
         "width_restriction": null,
         "col_loc": "interior",
-        "precision": 0.08333333333
+        "precision": null
     },
     {
         "id": "col_175_175_7",
