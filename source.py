@@ -621,9 +621,10 @@ class ColumnFooting(Footing):
         w_e,
     ):
         super().__init__(name, log, f_c, w_c, conc_type, grade, "column")
-        self.dims = 0
-        self.min_steel_area_short = 0
-        self.min_steel_area_long = 0
+        self.length = 0
+        self.width = 0
+        self.min_steel_area_width = 0
+        self.min_steel_area_length = 0
         # self.bearing_strength = 0
 
         self.design_column_footing(
@@ -654,29 +655,33 @@ class ColumnFooting(Footing):
         col_loc,
         w_e,
     ):
-        self.dims, area = self.get_dimensions(
+        self.length, self.width = self.get_dimensions(
             d_l, l_l, a_s_p, w_e, bottom, width_restriction, precision
         )  # sqft
+        area = self.length * self.width
         q_u = self.factored_soil_pressure(d_l, l_l, area)  # ksf
         self.check_two_way_shear(q_u, area, col_width, col_loc)
         self.check_one_way_shear(q_u, col_width)
-        steel_reqd_long, steel_reqd_short = self.get_steel_reqd(q_u, col_width)
 
-        if self.dims[0] != self.dims[1]:
-            self.log.write(
-                f"Calculate minimum steel area for {max(self.dims)} ft dimension...\n"
-            )
-        self.min_steel_area_long = self.get_min_reinforcing(
-            min(self.dims) * 12, steel_reqd_long
+        l = (self.length - (col_width / 12)) / 2
+        steel_reqd_length = self.get_steel_reqd(q_u, l, self.width)
+        self.min_steel_area_length = self.get_min_reinforcing(
+            self.width * 12, steel_reqd_length
         )
-        self.min_steel_area_short = self.min_steel_area_long
+        self.min_steel_area_width = self.min_steel_area_length
 
-        if self.dims[0] != self.dims[1]:
+        if self.width != self.length:
             self.log.write(
-                f"Calculate minimum steel area for {min(self.dims)} ft dimension...\n"
+                f"The above calculation was for parallel the {self.length} ft side. Now calculate for the {self.width} ft side...\n"
             )
-            self.min_steel_area_short = self.get_min_reinforcing(
-                max(self.dims) * 12, steel_reqd_short
+            l = (self.width - (col_width / 12)) / 2
+            steel_reqd_width = self.get_steel_reqd(q_u, l, self.length)
+            self.min_steel_area_width = self.get_min_reinforcing(
+                self.length * 12, steel_reqd_width
+            )
+        else:
+            self.log.write(
+                f"-> Required steel area the same in both directions for square footing.\n"
             )
 
     def get_dimensions(self, d_l, l_l, a_s_p, w_e, bottom, max_width, precision):
@@ -711,7 +716,7 @@ class ColumnFooting(Footing):
 
         if max_width:
             long_side = self.round_up_to_precision((reqd_area / max_width), precision)
-            dims = (max_width, long_side)
+            dims = (long_side, max_width)
         else:
             side = self.round_up_to_precision(math.sqrt(reqd_area), precision)
             dims = (side, side)
@@ -721,7 +726,7 @@ class ColumnFooting(Footing):
             f"-> Use (in ft): {dims}\n->Actual area provided: {actual_area} sq ft\n"
         )
 
-        return dims, actual_area
+        return dims
 
     def check_two_way_shear(self, q_u, area, width, col_loc):
         """Checks two way (punching) shear for column footing,
@@ -877,9 +882,7 @@ class ColumnFooting(Footing):
 
             self.log.write("Calculate V_u for one-way shear...\n")
             v_u = (
-                q_u
-                * min(self.dims)
-                * ((max(self.dims) - (col_size / 12)) / 2 - (self.d / 12))
+                q_u * self.width * ((self.length - (col_size / 12)) / 2 - (self.d / 12))
             )
             self.log.write(f"-> V_u = {round(v_u, 3)} kips\n")
 
@@ -891,7 +894,7 @@ class ColumnFooting(Footing):
             self.log.write("Calculate phi_V_n for one-way shear...\n")
             phi_vn = (
                 0.75
-                * (2 * self.lam * math.sqrt(self.f_c) * (self.dims[0] * 12) * self.d)
+                * (2 * self.lam * math.sqrt(self.f_c) * (self.width * 12) * self.d)
                 / 1000
             )
             self.log.write(f"-> phi_V_n = {round(phi_vn, 3)} kips\n")
@@ -915,7 +918,7 @@ class ColumnFooting(Footing):
                 (
                     v_u
                     * 1000
-                    / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * min(self.dims) * 12)
+                    / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * self.width * 12)
                 ),
                 0.5,
             )  # in.
@@ -929,7 +932,7 @@ class ColumnFooting(Footing):
             f"-> phi_V_n = {round(phi_vn,3)} kips > V_u = {round(v_u, 3)} kips (O.K.)\n"
         )
 
-    def get_steel_reqd(self, q_u, col_width):
+    def get_steel_reqd(self, q_u, l, w):
         """Calculates bending moment and reinforcement ratio. Returns required steel area
 
         Parameters
@@ -938,54 +941,35 @@ class ColumnFooting(Footing):
             the factored soil pressure in ksf
         col_width : float
             column width in inches
+        l : float
+            critical length along which q_u is acting
+        w : float
+            width along which q_u is acting
         """
-        if self.dims[0] != self.dims[1]:
-            self.log.write(
-                f"Calculate reinforcing steel requirements parallel to {max(self.dims)} ft side\n"
-            )
 
+        m_u = (q_u * w * l ** 2) / 2
+        self.log.write("Calculate required steel reinforcing area...\n")
         self.log.write("Calculate M_u...\n")
-        l = (max(self.dims) - (col_width / 12)) / 2
         self.log.write(f"-> Critical length, l = {l} ft\n")
-        m_u = (q_u * min(self.dims) * l ** 2) / 2
         self.log.write(f"-> M_u = {round(m_u, 3)} kip-ft\n")
-        k_bar = self.get_k_bar(m_u, 0.9, min(self.dims) * 12)
+        k_bar = self.get_k_bar(m_u, 0.9, w * 12)
         rho = self.solve_for_rho(k_bar)
-        long_reqd_area = self.calc_reqd_steel(rho, min(self.dims) * 12, "column")
+        reqd_area = self.calc_reqd_steel(rho, w * 12, "column")
 
-        if self.dims[0] != self.dims[1]:
-            self.log.write(
-                f"Calculate reinforcing steel requirements parallel to {min(self.dims)} ft side\n"
-            )
-            l = (min(self.dims) - (col_width / 12)) / 2
-            self.log.write(
-                f"-> Critical length for {min(self.dims)} ft side, l = {l} ft\n"
-            )
-            m_u = (q_u * max(self.dims) * l ** 2) / 2
-            self.log.write(f"-> M_u = {round(m_u, 3)} kip-ft\n")
-            k_bar = self.get_k_bar(m_u, 0.9, max(self.dims) * 12)
-            rho = self.solve_for_rho(k_bar)
-            short_reqd_area = self.calc_reqd_steel(rho, max(self.dims) * 12, "column")
-        else:
-            self.log.write(
-                f"-> Required steel area the same in both directions for square footing.\n"
-            )
-            short_reqd_area = long_reqd_area
-
-        return (long_reqd_area, short_reqd_area)
+        return reqd_area
 
     def get_ftng_dict(self):
         """ """
         d = {
             "id": self.name,
-            "ftng_dimensions": f"{self.dims[0]} ft x {self.dims[1]} ft",
+            "ftng_dimensions": f"{self.length} ft x {self.width} ft",
             "ftng_depth": f"{round(self.h, 3)} ft",
-            "min_steel_in_long_dim": f"{round(self.min_steel_area_long, 3)} sq in",
-            "min_steel_in_short_dim": f"{round(self.min_steel_area_short, 3)} sq in",
+            "min_steel_in_long_dim": f"{round(self.min_steel_area_length, 3)} sq in",
+            "min_steel_in_short_dim": f"{round(self.min_steel_area_width, 3)} sq in",
         }
 
         return d
 
     def __str__(self):
         """ """
-        return f"Footing dimensions: {self.dims} ft\nDepth: {round(self.h, 2)} ft\nMinimum Required Steel Along {max(self.dims)} ft Direction: {round(self.min_steel_area_long, 2)} sqin\nMinimum Required Steel Along {min(self.dims)} ft Direction: {round(self.min_steel_area_short, 2)} sqin"
+        return f"Footing dimensions: {self.length} ft x {self.width} ft\nDepth: {round(self.h, 2)} ft\nMinimum Required Steel Along {self.length} ft Direction: {round(self.min_steel_area_length, 2)} sqin\nMinimum Required Steel Along {self.width} ft Direction: {round(self.min_steel_area_width, 2)} sqin"
