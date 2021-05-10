@@ -1,34 +1,28 @@
 [
     {
         "id": "wall_10_20",
-        "ftng_width_ft": 6.667,
-        "ftng_depth_ft": 1.5,
-        "min_steel_sqin/ft": 0.58
+        "ftng_width": "6.667 ft",
+        "ftng_depth": "1.5 ft",
+        "min_steel": "0.58 sq in per ft"
     },
     {
         "id": "wall_6_15",
-        "ftng_width_ft": 6,
-        "ftng_depth_ft": 1.25,
-        "min_steel_sqin/ft": 0.44
+        "ftng_width": "6 ft",
+        "ftng_depth": "1.25 ft",
+        "min_steel": "0.44 sq in per ft"
     },
     {
         "id": "col_225_175",
-        "ftng_dimensions_ft": [
-            9.5,
-            9.5
-        ],
-        "ftng_depth_ft": 2,
-        "min_steel_in_long_dim_sqin": 7.296,
-        "min_steel_in_short_dim_sqin": 7.296
+        "ftng_dimensions": "9.5 ft x 9.5 ft",
+        "ftng_depth": "2 ft",
+        "min_steel_in_long_dim": "7.296 sq in",
+        "min_steel_in_short_dim": "7.296 sq in"
     },
     {
         "id": "col_175_175_7",
-        "ftng_dimensions_ft": [
-            7,
-            11.5
-        ],
-        "ftng_depth_ft": 2.083,
-        "min_steel_in_long_dim_sqin": 5.88,
-        "min_steel_in_short_dim_sqin": 6.21
+        "ftng_dimensions": "7.0 ft x 11.5 ft",
+        "ftng_depth": "2.083 ft",
+        "min_steel_in_long_dim": "5.998 sq in",
+        "min_steel_in_short_dim": "6.21 sq in"
     }
 ]

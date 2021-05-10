@@ -62,16 +62,16 @@ class Footing:
             or sand-lightweight ("s_lw")
 
         """
-        self.log.write("Calulating lambda in (ACI 318-14 Sec 19.2.4.2)...\n")
+        self.log.write("Get lambda (ACI 318-14 Sec 19.2.4.2)...\n")
 
         if conc_type == "nw":
-            self.log.write("\tConcrete is normal-weight. Lambda = 1.0\n")
+            self.log.write("-> Concrete is normal-weight. Lambda = 1.0\n")
             return 1.0
         elif conc_type == "lw":
-            self.log.write("\tConcrete is lightweight. Lambda = 0.75\n")
+            self.log.write("-> Concrete is lightweight. Lambda = 0.75\n")
             return 0.75
         elif conc_type == "s_lw":
-            self.log.write("\tConcrete is sand-lightweight. Lambda = 0.85\n")
+            self.log.write("-> Concrete is sand-lightweight. Lambda = 0.85\n")
             return 0.85
 
     def set_beta_1(self):
@@ -80,15 +80,15 @@ class Footing:
         beta_1 is a  factor that is a function of the strength of the concrete.
         See ACI 318-14 Sec 22.2.2.4.3
         """
-        self.log.write("Calulating beta_1 (ACI 318-14 Sec 22.2.2.4.3)...\n")
+        self.log.write("Calulate beta_1 (ACI 318-14 Sec 22.2.2.4.3)...\n")
 
         if self.f_c > 4000:
             eq = 0.85 - (0.05 * (self.f_c - 4000) / 1000)
             beta_1 = max(eq, 0.65)
-            self.log.write(f"\tf-prime-c is {self.f_c}. beta_1 = {beta_1}\n")
+            self.log.write(f"-> f-prime-c is {self.f_c}. beta_1 = {beta_1}\n")
             return beta_1
         else:
-            self.log.write(f"\tf-prime-c is {self.f_c}. beta_1 = 0.85\n")
+            self.log.write(f"-> f-prime-c is {self.f_c}. beta_1 = 0.85\n")
             return 0.85
 
     def get_steel_props(self, grade):
@@ -103,16 +103,16 @@ class Footing:
 
         """
 
-        self.log.write(f"Getting properties for Grade {grade} reinforcing steel...\n")
+        self.log.write(f"Get properties for Grade {grade} reinforcing steel...\n")
 
         if grade == 40:
-            self.log.write("\tf_y = 40000 psi, epsilon_y = 0.00138\n")
+            self.log.write("-> f_y = 40000 psi, epsilon_y = 0.00138\n")
             return (40000, 0.00138)
         elif grade == 60:
-            self.log.write("\tf_y = 60000 psi, epsilon_y = 0.00207\n")
+            self.log.write("-> f_y = 60000 psi, epsilon_y = 0.00207\n")
             return (60000, 0.00207)
         elif grade == 75:
-            self.log.write("\tf_y = 75000 psi, epsilon_y = 0.00259\n")
+            self.log.write("-> f_y = 75000 psi, epsilon_y = 0.00259\n")
             return (75000, 0.00259)
 
     def set_d(self, ftng_type, bar_size=8):
@@ -130,24 +130,17 @@ class Footing:
         """
 
         self.log.write(
-            f"Caluclating d for a footing thickness of {round(self.h, 3)} ft...\n"
+            f"Caluclate d for footing thickness h = {round(self.h, 3)} ft...\n"
         )
 
         if ftng_type == "wall":
             self.d = (self.h * 12) - 3 - ((bar_size / 8) / 2)
-            self.log.write(f"\td = {round(self.d, 2)} in.\n")
+            self.log.write(f"-> d = {round(self.d, 2)} in.\n")
             pass
         else:
             self.d = (self.h * 12) - 3 - (bar_size / 8)
-            self.log.write(f"\td = {round(self.d, 2)} in.\n")
+            self.log.write(f"-> d = {round(self.d, 2)} in.\n")
             pass
-
-    # def factor_loads(self, d_l, l_l):
-    #     """Calculates the minimum design load by multiplying service loads by given factors (ACI Section 5.3.1).
-    #     For columns the result is in kips, and for walls the result is in kip/ft.
-    #     NOTE: This ACI section is slightly modified for our purpose. See ACI Code, Section 5.3 for more details.
-    #     """
-    #     return (1.2 * d_l) + (1.6 * l_l)
 
     def net_asp(self, asp, w_e, bottom):
         """Returns the net allowable soil pressure (ASP) in ksf.
@@ -167,12 +160,12 @@ class Footing:
         """
 
         self.log.write(
-            f"Calculating net allowable soil pressure...\n\tASP = {asp} psf, w_e = {w_e} pcf, bottom of footing {bottom} ft below eartth surface.\n"
+            f"Calculate net allowable soil pressure...\n-> ASP = {asp} psf, w_e = {w_e} pcf, bottom of footing {bottom} ft below eartth surface.\n"
         )
 
         net_asp = (asp - (w_e * (bottom - self.h)) - (self.w_c * self.h)) / 1000
 
-        self.log.write(f"\tNet allowable soil pressure = {net_asp} ksf.\n")
+        self.log.write(f"-> Net allowable soil pressure = {net_asp} ksf.\n")
 
         return net_asp
 
@@ -189,89 +182,203 @@ class Footing:
             dimension of footing (width for wall, area for column)
         """
 
-        self.log.write("Calculating factored soil pressure, q_u... \n\t")
+        self.log.write("Calculate factored soil pressure, q_u... \n")
         factored_asp = ((1.2 * d_l) + (1.6 * l_l)) / dimension
-        self.log.write(f"q_u = {round(factored_asp, 2)} ksf.\n")
+        self.log.write(f"-> q_u = {round(factored_asp, 2)} ksf.\n")
 
         return factored_asp
 
     def get_k_bar(self, m_u, phi, b):
-        """ """
-        return m_u * 12 / (phi * b * (self.d ** 2))
+        """Returns the coefficient of resistance, k-bar
 
-    def get_rho(self, k_bar):
-        """ """
+        Parameters
+        ----------
+        m_u : float
+            bending moment
+        phi : float
+            strength reduction factor (ACI 318-14 Sec 21.2)
+        b : float
+            element width
+
+        """
+
+        k_bar = m_u * 12 / (phi * b * (self.d ** 2))
+        self.log.write(f"-> k_bar = {round(k_bar, 4)} ksi -----> ")
+        return k_bar
+
+    def solve_for_rho(self, k_bar):
+        """Returns reinforcement ratio, rho, and corrects
+        phi and k_bar if need be.
+
+        Parameters
+        ----------
+        k_bar : float
+            coefficient of resistance
+        """
         a = (-0.59 * (self.f_y ** 2)) / self.f_c
         b = self.f_y
         c = -k_bar * 1000
         rho = (-b + math.sqrt((b ** 2) - (4 * a * c))) / (2 * a)
+        self.log.write(f"rho = {self.round_up(rho, 4)}\n")
+        self.log.write(f"Check assumption that phi = 0.9...\n")
 
         epsilon_t = self.get_epsilon_t(rho)
         phi = self.get_phi(epsilon_t)
 
         if phi < 0.9:
+            self.log.write(f"-> {phi} < 0.9. Recalculate k_bar...\n")
             k_bar = self.get_k_bar(m_u, phi, b)
             c = -k_bar * 1000
             rho = (-b + math.sqrt((b ** 2) - (4 * a * c))) / (2 * a)
+            self.log.write(f"-> rho = {self.round_up(rho, 4)}\n")
 
         return self.round_up(rho, 4)
 
     def get_epsilon_t(self, rho):
-        """ """
+        """Returns tensile strain, epsilon_t, for given rho
+
+        Parameters
+        ----------
+        rho : float
+            reinforcement ratio
+        """
+
         return (0.002555 * self.f_c * self.beta_1 / (rho * self.f_y)) - 0.003
 
     def get_phi(self, epsilon_t):
-        """ """
-        if epsilon_t < self.epsilon_y:
-            return 0.65
-        elif epsilon_t > 0.005:
-            return 0.9
-        else:
-            return 0.65 + (
-                (0.25 / (0.005 - self.epsilon_y)) * (epsilon_t - self.epsilon_y)
-            )
+        """Returns strength reduction factor, phi
 
-    def get_reqd_area(self, rho, b):
-        """Calculates the minimum flexural reinforcement required by analysis (ACI Section 9.6.1.1)
-
-        rho = ratio of tension steel area to effective concrete area
-        b = section width
-        d = effective depth of steel
+        Parameters
+        ----------
+        epsilon_t : float
+            tensile strain
         """
 
-        return rho * b * self.d
+        if epsilon_t < self.epsilon_y:
+            self.log.write("-> Compression section -----> phi = 0.65\n")
+            return 0.65
+        elif epsilon_t > 0.005:
+            self.log.write("-> Tension section -----> phi = 0.9 (O.K.)\n")
+            return 0.9
+        else:
+            phi = 0.65 + (
+                (0.25 / (0.005 - self.epsilon_y)) * (epsilon_t - self.epsilon_y)
+            )
+            self.log.write(f"-> Transition section -----> phi = {round(phi, 2)}\n")
+            return phi
+
+    def calc_reqd_steel(self, rho, b, ftng_type):
+        """Calculates the minimum flexural reinforcement required by analysis
+        See ACI 318-14 Sec 9.6.1.1
+
+        Parameters
+        ----------
+        rho : float
+            ratio of tension steel area to effective concrete area
+        b : float
+            section width
+        d : float
+            effective depth of steel
+        ftng_type : str
+            footing type (wall or column)
+        """
+        self.log.write("Calculate required steel area (ACI 318-14 Sec 9.6.1.1)...\n")
+        reqd_area = rho * b * self.d
+
+        if ftng_type == "wall":
+            self.log.write(
+                f"-> A_s required = {round(reqd_area, 3)} sq_in per foot of wall\n"
+            )
+        else:
+            self.log.write(f"-> A_s required = {round(reqd_area, 3)} sq_in\n")
+
+        return reqd_area
 
     def get_min_beam(self, b):
         """Calculates the minimum flexural reinforcement for nonprestressed beams
         as required by ACI Section 9.6.1.2
+
+        Parameters
+        ----------
+        b : float
+            element width in inches
         """
+
+        self.log.write("Calculate A_s,min for beams (ACI 318-14 Sec 9.6.1.2)...\n")
         a = (3 * math.sqrt(self.f_c) / self.f_y) * b * self.d
         b = (200 / self.f_y) * b * self.d
         min_area_beam = max(a, b)
+        self.log.write(f"-> A_s,min for beams = {round(min_area_beam,3)} sq in.\n")
 
         return min_area_beam
 
     def get_min_slab(self, b):
-        """ """
+        """Calculates the minimum flexural reinforcement for slabs
+        as required by ACI Section 7.6.1.1
+
+        Parameters
+        ----------
+        b : float
+            element width in inches
+        """
+
+        self.log.write("Calculate A_s,min for slabs (ACI 318-14 Sec 7.6.1.1)...\n")
         if self.f_y < 60000:
-            return 0.0020 * b * self.h * 12
+            min_are_slab = 0.0020 * b * self.h * 12
         else:
             a = ((0.0018 * 60000) / self.f_y) * b * self.h * 12
             b = 0.0014 * b * self.h
             min_area_slab = max(a, b)
-            return min_area_slab
+
+        self.log.write(f"-> A_s,min for slabs = {round(min_area_slab,3)} sq in.\n")
+        return min_area_slab
 
     def aci_sec9_6_1_3(self, reqd_area):
-        """ """
-        return (4 / 3) * reqd_area
+        """Calculates the minimum flexural reinforcement for beams as required by
+        ACI 318-14 Sec 9.6.1.3
 
-    def get_min_area(self, b, reqd_area):
-        """ """
+        If A_s provided is at least one-third greater than A_s required by Sec 9.6.1.1,
+        then 9.6.1.2 need not be satisfied.
+
+        Parameters
+        ----------
+        reqd_area : float
+            area of steel required by analysis (ACI 318-14 Sec 9.6.1.1)
+        """
+
+        self.log.write("Calculate 1.33 x A_s required (ACI 318-14 Sec 9.6.1.3)...\n")
+        sec_9_6_1_3 = (4 / 3) * reqd_area
+        self.log.write(
+            f"-> A_s as required by 9.6.1.3 = {round(sec_9_6_1_3, 3)} sq in.\n"
+        )
+
+        return sec_9_6_1_3
+
+    def get_min_reinforcing(self, b, reqd_area):
+        """Returns the governing minimum required steel for footing
+
+        The minimum steel required is the maximum of A_s,min for beams, A_s,min
+        for slabs, and A_s reqd. Unless as provisioned in Sec 9.6.1.3
+
+        Parameters
+        ----------
+        b : float
+            element width
+        reqd_area : float
+            minimum required steel reinforcement provided by analysis
+        """
         min_area_beam = self.get_min_beam(b)
         min_area_slab = self.get_min_slab(b)
-        sec_9_6_1_3 = self.aci_sec9_6_1_3(reqd_area)
 
-        return max(min(min_area_beam, sec_9_6_1_3), min_area_slab)
+        if reqd_area >= min_area_beam:
+            governing = max(min_area_beam, min_area_slab, reqd_area)
+        else:
+            sec_9_6_1_3 = self.aci_sec9_6_1_3(reqd_area)
+            governing = max(min(min_area_beam, sec_9_6_1_3), min_area_slab)
+
+        self.log.write(f"-> Use A_s,min = {round(governing,3)} sq in.\n")
+
+        return governing
 
     def round_up_to_precision(self, x, precision):
         """ """
@@ -341,17 +448,11 @@ class WallFooting(Footing):
         bar_coat,
         w_e,
     ):
-        # load = d_l + l_l  # k/ft
-        # factored_load = self.factor_loads(d_l, l_l)  # k/ft
-        # net_asp = self.net_asp(a_s_p, w_e, bottom)  # ksf
         self.width = self.get_req_width(d_l, l_l, a_s_p, w_e, bottom, precision)  # ft
         q_u = self.factored_soil_pressure(d_l, l_l, self.width)  # ksf
         self.check_one_way_shear(q_u, self.width, wall_width)
-        m_u = self.get_moment(q_u, wall_width, wall_type)
-        k_bar = self.get_k_bar(m_u, 0.9, 12)
-        rho = self.get_rho(k_bar)
-        reqd_area = self.get_reqd_area(rho, 12)
-        self.min_steel_area = self.get_min_area(12, reqd_area)
+        steel_reqd = self.get_steel_reqd(q_u, wall_width, wall_type)
+        self.min_steel_area = self.get_min_reinforcing(12, steel_reqd)
 
     def get_req_width(self, d_l, l_l, a_s_p, w_e, bottom, precision):
         """Calculates net allowable soil pressure, and returns
@@ -375,13 +476,13 @@ class WallFooting(Footing):
         """
         net_asp = self.net_asp(a_s_p, w_e, bottom)
 
-        self.log.write("Calculating required footing width:\n\t")
+        self.log.write("Calculate required footing width:\n")
 
         reqd_width = (d_l + l_l) / net_asp
         used_width = self.round_up_to_precision(reqd_width, precision)
 
         self.log.write(
-            f"Required footing width: {round(reqd_width, 2)} ft.\n\tUse {round(used_width, 3)} ft \n"
+            f"-> Required footing width: {round(reqd_width, 2)} ft.\n-> Use {round(used_width, 3)} ft \n"
         )
 
         return used_width
@@ -409,29 +510,29 @@ class WallFooting(Footing):
             See ACI 318-14 Sec 9.4.3.2
             """
 
-            self.log.write("\tCalculating V_u for one-way shear...\n")
+            self.log.write("Calculate V_u for one-way shear...\n")
             v_u = q_u * 1 * (((req_width - (wall_width / 12)) / 2) - (self.d / 12))
-            self.log.write(f"\t\tV_u = {round(v_u, 3)} kips\n")
+            self.log.write(f"-> V_u = {round(v_u, 3)} kips\n")
 
             return v_u
 
         def get_phi_vn(self):
             """Returns the factored concrete nominal shear strength (phi_vn)"""
 
-            self.log.write("\tCalculating phi_V_n for one-way shear...\n")
+            self.log.write("Calculate phi_V_n for one-way shear...\n")
             phi_vn = 0.75 * (2 * self.lam * math.sqrt(self.f_c) * 12 * self.d) / 1000
-            self.log.write(f"\t\tphi_V_n = {round(phi_vn, 3)} kips\n")
+            self.log.write(f"-> phi_V_n = {round(phi_vn, 3)} kips\n")
 
             return phi_vn
 
-        self.log.write("Checking one-way shear...\n")
+        self.log.write("Check one-way shear...\n")
         v_u = get_v_u(self, q_u, req_width, wall_width)  # kip
         phi_vn = get_phi_vn(self)  # kip
 
         while phi_vn >= (1.5 * v_u):
             self.h -= 1 / 12
             self.log.write(
-                f"\t{round(phi_vn,3)} >> {round(v_u, 3)} ----> try footing thickness = {round(self.h,3)} ft\n\t"
+                f"-> phi_V_n = {round(phi_vn,3)} >> V_u = {round(v_u, 3)} -----> try footing thickness = {round(self.h,3)} ft\n"
             )
             self.set_d("wall")
             v_u = get_v_u(self, q_u, req_width, wall_width)  # kip
@@ -443,40 +544,59 @@ class WallFooting(Footing):
             )  # in.
             self.h = (self.d + 3 + ((8 / 8) / 2)) / 12
             self.log.write(
-                f"\t{round(phi_vn,3)} < {round(v_u, 3)} ----> try footing thickness = {round(self.h,3)} ft\n"
+                f"-> phi_V_n = {round(phi_vn,3)} < V_u = {round(v_u, 3)} -----> try footing thickness = {round(self.h,3)} ft\n"
             )
             phi_vn = get_phi_vn(self)
 
-        self.log.write(f"\t{round(phi_vn,3)} > {round(v_u, 3)} (O.K.)\n")
+        self.log.write(
+            f"-> phi_V_n = {round(phi_vn,3)} > V_u = {round(v_u, 3)} (O.K.)\n"
+        )
 
-    def get_moment(self, q_u, wall_width, wall_type):
-        """ """
+    def get_steel_reqd(self, q_u, wall_width, wall_type):
+        """Calculates bending moment and reinforcement ratio. Returns required steel area
 
-        def critical_length(self, wall_width, wall_type):
-            """ """
-            if wall_type == "masonry":
-                return (self.width - (wall_width / 12)) / 2 + (0.25 * wall_width / 12)
-            elif wall_type == "concrete":
-                return (self.width - (wall_width / 12)) / 2
+        Parameters
+        ----------
+        q_u : float
+            the factored soil pressure in ksf
+        wall_width : float
+            the wall width in inches
+        wall_type : str
+            wall type (masonry or concrete)
 
-        l = critical_length(self, wall_width, wall_type)  # ft
+        """
 
-        return q_u * l ** 2 / 2
+        self.log.write("Calculate M_u...\n")
+        if wall_type == "masonry":
+            l = (self.width - (wall_width / 12)) / 2 + (0.25 * wall_width / 12)
+            self.log.write(f"-> {wall_type} wall -----> critical length = {l} ft \n")
+        elif wall_type == "concrete":
+            l = (self.width - (wall_width / 12)) / 2
+            self.log.write(f"-> {wall_type} wall -----> critical length = {l} ft \n")
+
+        m_u = q_u * l ** 2 / 2
+        self.log.write(f"-> M_u = {m_u} kip-ft\n")
+
+        k_bar = self.get_k_bar(m_u, 0.9, 12)
+        rho = self.solve_for_rho(k_bar)
+        reqd_area = self.calc_reqd_steel(rho, 12, "wall")
+
+        return reqd_area
 
     def get_ftng_dict(self):
         """ """
         d = {
             "id": self.name,
-            "ftng_width_ft": round(self.width, 3),
-            "ftng_depth_ft": round(self.h, 3),
-            "min_steel_sqin/ft": round(self.min_steel_area, 2),
+            "ftng_width": f"{round(self.width, 3)} ft",
+            "ftng_depth": f"{round(self.h, 3)} ft",
+            "min_steel": f"{round(self.min_steel_area, 2)} sq in per ft",
         }
 
         return d
 
     def __str__(self):
         """ """
-        return f"Footing width: {self.width} ft\nDepth: {round(self.h, 2)} ft\nMinimum Required Steel: {round(self.min_steel_area, 2)} sqin/ft"
+        return f"Footing width: {round(self.width, 2)} ft\nDepth: {round(self.h, 2)} ft\nMinimum Required Steel: {round(self.min_steel_area, 2)} sqin/ft"
 
 
 class ColumnFooting(Footing):
@@ -502,11 +622,9 @@ class ColumnFooting(Footing):
     ):
         super().__init__(name, log, f_c, w_c, conc_type, grade, "column")
         self.dims = 0
-        self.length_reqd_area = 0
-        self.width_reqd_area = 0
-        self.bearing_strength = 0
         self.min_steel_area_short = 0
-        self.min_steel_area = 0
+        self.min_steel_area_long = 0
+        # self.bearing_strength = 0
 
         self.design_column_footing(
             precision,
@@ -536,31 +654,29 @@ class ColumnFooting(Footing):
         col_loc,
         w_e,
     ):
-        # load = d_l + l_l  # kip
-        # factored_load = self.factor_loads(d_l, l_l)  # kip
-        # net_asp = self.net_asp(a_s_p, w_e, bottom)  # ksf
         self.dims, area = self.get_dimensions(
             d_l, l_l, a_s_p, w_e, bottom, width_restriction, precision
         )  # sqft
-        # self.dims = self.find_req_dims(req_area, width_restriction, precision)  # ft
-        # actual_area = self.dims[0] * self.dims[1]  # sqft
         q_u = self.factored_soil_pressure(d_l, l_l, area)  # ksf
         self.check_two_way_shear(q_u, area, col_width, col_loc)
-        one_way_shear = self.check_one_way_shear(q_u, self.dims, col_width)
-        m_u = self.get_m_u(q_u, self.dims, col_width)
-        k_bar = self.get_k_bar(m_u, 0.9, min(self.dims) * 12)
-        rho = self.get_rho(k_bar)
-        reqd_area = self.get_reqd_area(rho, min(self.dims) * 12)
-        self.min_steel_area = self.get_min_area(min(self.dims) * 12, reqd_area)
-        self.min_steel_area_short = self.min_steel_area
+        self.check_one_way_shear(q_u, col_width)
+        steel_reqd_long, steel_reqd_short = self.get_steel_reqd(q_u, col_width)
 
         if self.dims[0] != self.dims[1]:
-            short_mu = self.get_short_mu(q_u, self.dims, col_width)
-            short_k_bar = self.get_k_bar(short_mu, 0.9, max(self.dims) * 12)
-            short_rho = self.get_rho(short_k_bar)
-            short_reqd_area = self.get_reqd_area(short_rho, max(self.dims) * 12)
-            self.min_steel_area_short = self.get_min_area(
-                max(self.dims) * 12, short_reqd_area
+            self.log.write(
+                f"Calculate minimum steel area for {max(self.dims)} ft dimension...\n"
+            )
+        self.min_steel_area_long = self.get_min_reinforcing(
+            min(self.dims) * 12, steel_reqd_long
+        )
+        self.min_steel_area_short = self.min_steel_area_long
+
+        if self.dims[0] != self.dims[1]:
+            self.log.write(
+                f"Calculate minimum steel area for {min(self.dims)} ft dimension...\n"
+            )
+            self.min_steel_area_short = self.get_min_reinforcing(
+                max(self.dims) * 12, steel_reqd_short
             )
 
     def get_dimensions(self, d_l, l_l, a_s_p, w_e, bottom, max_width, precision):
@@ -588,10 +704,10 @@ class ColumnFooting(Footing):
 
         net_asp = self.net_asp(a_s_p, w_e, bottom)
 
-        self.log.write("Calculating required footing area:\n")
+        self.log.write("Calculate required footing area...\n")
 
         reqd_area = (d_l + l_l) / net_asp
-        self.log.write(f"\tRequired footing area: {round(reqd_area, 2)} square ft\n")
+        self.log.write(f"-> Required footing area: {round(reqd_area, 2)} square ft\n")
 
         if max_width:
             long_side = self.round_up_to_precision((reqd_area / max_width), precision)
@@ -602,20 +718,10 @@ class ColumnFooting(Footing):
 
         actual_area = dims[0] * dims[1]
         self.log.write(
-            f"\tUse (in ft): {dims}\n\tActual area provided: {actual_area} sq ft\n"
+            f"-> Use (in ft): {dims}\n->Actual area provided: {actual_area} sq ft\n"
         )
 
         return dims, actual_area
-
-    # def find_req_dims(self, area, max_width, precision):
-    #     """returns footing dimensions"""
-
-    #     if max_width:
-    #         long_side = self.round_up_to_precision((area / max_width), precision)
-    #         return (max_width, long_side)
-    #     else:
-    #         side = self.round_up_to_precision(math.sqrt(area), precision)
-    #         return (side, side)
 
     def check_two_way_shear(self, q_u, area, width, col_loc):
         """Checks two way (punching) shear for column footing,
@@ -643,11 +749,11 @@ class ColumnFooting(Footing):
             """
 
             self.log.write(
-                "\tCalculating required shear strenght, V_u (ACI 318-14 Sec 22.6.4.1)...\n"
+                "Calculate required shear strenght, V_u (ACI 318-14 Sec 22.6.4.1)...\n"
             )
             a = width + self.d  # in.
             v_u = q_u * (area - ((a / 12) ** 2))  # kip
-            self.log.write(f"\t\tV_u = {round(v_u,3)} kips\n")
+            self.log.write(f"-> V_u = {round(v_u,3)} kips\n")
 
             return v_u
 
@@ -660,13 +766,13 @@ class ColumnFooting(Footing):
             """
 
             self.log.write(
-                "\tCalculating factored concrete shear strenght, phi_V_n (ACI 318-14 Sec 21.2)...\n"
+                "Calculate factored concrete shear strenght, phi_V_n (ACI 318-14 Sec 21.2)...\n"
             )
             a = width + self.d
             b_0 = 4 * a  # in.
             v_c = get_v_c(self, b_0, col_loc)  # kip
             phi_vn = 0.75 * v_c  # kip
-            self.log.write(f"\t\tphi_V_n = {round(phi_vn, 3)} kips\n")
+            self.log.write(f"-> phi_V_n = {round(phi_vn, 3)} kips\n")
 
             return phi_vn
 
@@ -694,16 +800,16 @@ class ColumnFooting(Footing):
                     return 20
 
             self.log.write(
-                f"\t\tCalcukating V_c for two two-way shear (ACI Sec 22.6.5.2)...\n"
+                f"Calcukate V_c for two two-way shear (ACI Sec 22.6.5.2)...\n"
             )
 
             v_ca = (4 * self.lam * math.sqrt(self.f_c) * b_0 * self.d) / 1000
-            self.log.write(f"\t\t\tv_ca = {round(v_ca, 3)} kips\n")
+            self.log.write(f"-> v_ca = {round(v_ca, 3)} kips\n")
             v_cb = (6 * self.lam * math.sqrt(self.f_c) * b_0 * self.d) / 1000
-            self.log.write(f"\t\t\tv_cb = {round(v_cb, 3)} kips\n")
+            self.log.write(f"-> v_cb = {round(v_cb, 3)} kips\n")
 
             alpha_s = get_alpha_s(self, col_loc)
-            self.log.write(f"\t\t\talpha_s = {alpha_s} ----> ")
+            self.log.write(f"-> alpha_s = {alpha_s} -----> ")
             v_cc = (
                 (((alpha_s * self.d) / b_0) + 2)
                 * self.lam
@@ -715,11 +821,11 @@ class ColumnFooting(Footing):
 
             use = min(v_ca, v_cb, v_cc)
 
-            self.log.write(f"\t\t\tUse V_c = {round(use, 3)} kips\n")
+            self.log.write(f"-> Use V_c = {round(use, 3)} kips\n")
 
             return use
 
-        self.log.write("Checking two-way shear...\n")
+        self.log.write("Check two-way shear...\n")
 
         v_u = get_v_u(self, width, q_u, area)  # kip
         phi_vn = get_phi_vn(self, width, col_loc)  # kip
@@ -742,36 +848,11 @@ class ColumnFooting(Footing):
             v_u = get_v_u(self, width, q_u, area)  # kip
             phi_vn = get_phi_vn(self, width, col_loc)  # kip
 
-        self.log.write(f"\t{round(phi_vn,3)} > {round(v_u, 3)} (O.K.)\n")
+        self.log.write(
+            f"-> phi_V_n = {round(phi_vn,3)} > V_u = {round(v_u, 3)} (O.K.)\n"
+        )
 
-        # return phi_vn
-
-    # def aci_sec22_6_5_2(self, b_0, col_loc):
-    #     """ """
-    #     alpha_s = self.find_alpha_s(col_loc)
-
-    #     v_ca = (4 * self.lam * math.sqrt(self.f_c) * b_0 * self.d) / 1000
-    #     v_cb = (6 * self.lam * math.sqrt(self.f_c) * b_0 * self.d) / 1000
-    #     v_cc = (
-    #         (((alpha_s * self.d) / b_0) + 2)
-    #         * self.lam
-    #         * math.sqrt(self.f_c)
-    #         * b_0
-    #         * self.d
-    #     ) / 1000
-
-    #     return min(v_ca, v_cb, v_cc)
-
-    # def find_alpha_s(self, col_loc):
-    #     """ """
-    #     if col_loc == "interior":
-    #         return 40
-    #     elif col_loc == "edge":
-    #         return 30
-    #     elif col_loc == "corner":
-    #         return 20
-
-    def check_one_way_shear(self, q_u, dims, col_size):
+    def check_one_way_shear(self, q_u, col_size):
         """Checks one-way (beam) shear for column footing, and adjusts
         footing thickness as needed.
 
@@ -779,95 +860,132 @@ class ColumnFooting(Footing):
         ----------
         q_u : float
             the factored soil pressure in ksf
-        dims : tuple
-            the footing dimensions in ft
         col_size : float
             the column width in inches
 
         """
 
-        def get_v_u(self, q_u, req_width, wall_width):
+        self.log.write("Check one-way shear...\n")
+
+        def get_v_u(self, q_u, col_size):
             """Returns the required shear strength (V_u) in kips.
 
-            V_u is taken at the critical section at a distance equal to
-            the effective dephth d away from the face of the wall.
+            V_u is taken with critical section at a distance equal to
+            the effective dephth, d, away from the face of the wall.
             See ACI 318-14 Sec 9.4.3.2
             """
 
-            self.log.write("\tCalculating V_u for one-way shear...\n")
-            v_u = q_u * 1 * (((req_width - (wall_width / 12)) / 2) - (self.d / 12))
-            self.log.write(f"\t\tV_u = {round(v_u, 3)} kips\n")
+            self.log.write("Calculate V_u for one-way shear...\n")
+            v_u = (
+                q_u
+                * min(self.dims)
+                * ((max(self.dims) - (col_size / 12)) / 2 - (self.d / 12))
+            )
+            self.log.write(f"-> V_u = {round(v_u, 3)} kips\n")
 
             return v_u
 
         def get_phi_vn(self):
             """Returns the factored concrete nominal shear strength (phi_vn)"""
 
-            self.log.write("\tCalculating phi_V_n for one-way shear...\n")
-            phi_vn = 0.75 * (2 * self.lam * math.sqrt(self.f_c) * 12 * self.d) / 1000
-            self.log.write(f"\t\tphi_V_n = {round(phi_vn, 3)} kips\n")
+            self.log.write("Calculate phi_V_n for one-way shear...\n")
+            phi_vn = (
+                0.75
+                * (2 * self.lam * math.sqrt(self.f_c) * (self.dims[0] * 12) * self.d)
+                / 1000
+            )
+            self.log.write(f"-> phi_V_n = {round(phi_vn, 3)} kips\n")
 
             return phi_vn
 
-        v_u = q_u * dims[0] * ((dims[1] - (col_size / 12)) / 2 - (self.d / 12))  # kip
-        v_c = (
-            2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * self.d
-        ) / 1000  # kip
+        v_u = get_v_u(self, q_u, col_size)  # kip
+        phi_vn = get_phi_vn(self)  # kip
 
-        phi_vn = 0.75 * v_c  # kip
-
-        while phi_vn > (1.5 * v_u):
+        while phi_vn >= (1.5 * v_u):
             self.h -= 1 / 12
+            self.log.write(
+                f"-> {round(phi_vn,3)} >> {round(v_u, 3)} -----> try footing thickness = {round(self.h,3)} ft\n"
+            )
             self.set_d(self.h, "column")
-            v_u = q_u * dims[0] * ((dims[1] - col_size) / (12 * 2) - (self.d / 12))
-            v_c = (
-                2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * self.d
-            ) / 1000  # kip
-            phi_vn = 0.75 * v_c
+            v_u = get_v_u(self, q_u, col_size)  # kip
+            phi_vn = get_phi_vn(self)  # kip
 
         if phi_vn < v_u:
             self.d = self.round_up_to_precision(
                 (
                     v_u
                     * 1000
-                    / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * dims[0] * 12)
+                    / (2 * self.lam * 0.75 * math.sqrt(self.f_c) * min(self.dims) * 12)
                 ),
                 0.5,
             )  # in.
+            self.log.write(
+                f"-> {round(phi_vn, 3)} < {round(v_u, 3)} -----> solve for d. New d = {round(self.d,3)} in.\n"
+            )
             self.h = (self.d + 3 + (8 / 8)) / 12
-            v_c = (
-                2 * self.lam * math.sqrt(self.f_c) * (dims[0] * 12) * self.d
-            ) / 1000  # kip
-            phi_vn = 0.75 * v_c
+            phi_vn = get_phi_vn(self)  # kip
 
-        return phi_vn
+        self.log.write(
+            f"-> phi_V_n = {round(phi_vn,3)} kips > V_u = {round(v_u, 3)} kips (O.K.)\n"
+        )
 
-    def get_m_u(self, q_u, dims, col_width):
-        """ """
-        l = (max(dims) - (col_width / 12)) / 2
-        mu = (q_u * min(dims) * l ** 2) / 2
+    def get_steel_reqd(self, q_u, col_width):
+        """Calculates bending moment and reinforcement ratio. Returns required steel area
 
-        return mu
+        Parameters
+        ----------
+        q_u : float
+            the factored soil pressure in ksf
+        col_width : float
+            column width in inches
+        """
+        if self.dims[0] != self.dims[1]:
+            self.log.write(
+                f"Calculate reinforcing steel requirements parallel to {max(self.dims)} ft side\n"
+            )
 
-    def get_short_mu(self, q_u, dims, col_width):
-        """ """
-        l = (min(dims) - (col_width / 12)) / 2
-        mu = (q_u * max(dims) * l ** 2) / 2
+        self.log.write("Calculate M_u...\n")
+        l = (max(self.dims) - (col_width / 12)) / 2
+        self.log.write(f"-> Critical length, l = {l} ft\n")
+        m_u = (q_u * min(self.dims) * l ** 2) / 2
+        self.log.write(f"-> M_u = {round(m_u, 3)} kip-ft\n")
+        k_bar = self.get_k_bar(m_u, 0.9, min(self.dims) * 12)
+        rho = self.solve_for_rho(k_bar)
+        long_reqd_area = self.calc_reqd_steel(rho, min(self.dims) * 12, "column")
 
-        return mu
+        if self.dims[0] != self.dims[1]:
+            self.log.write(
+                f"Calculate reinforcing steel requirements parallel to {min(self.dims)} ft side\n"
+            )
+            l = (min(self.dims) - (col_width / 12)) / 2
+            self.log.write(
+                f"-> Critical length for {min(self.dims)} ft side, l = {l} ft\n"
+            )
+            m_u = (q_u * max(self.dims) * l ** 2) / 2
+            self.log.write(f"-> M_u = {round(m_u, 3)} kip-ft\n")
+            k_bar = self.get_k_bar(m_u, 0.9, max(self.dims) * 12)
+            rho = self.solve_for_rho(k_bar)
+            short_reqd_area = self.calc_reqd_steel(rho, max(self.dims) * 12, "column")
+        else:
+            self.log.write(
+                f"-> Required steel area the same in both directions for square footing.\n"
+            )
+            short_reqd_area = long_reqd_area
+
+        return (long_reqd_area, short_reqd_area)
 
     def get_ftng_dict(self):
         """ """
         d = {
             "id": self.name,
-            "ftng_dimensions_ft": self.dims,
-            "ftng_depth_ft": round(self.h, 3),
-            "min_steel_in_long_dim_sqin": round(self.min_steel_area, 3),
-            "min_steel_in_short_dim_sqin": round(self.min_steel_area_short, 3),
+            "ftng_dimensions": f"{self.dims[0]} ft x {self.dims[1]} ft",
+            "ftng_depth": f"{round(self.h, 3)} ft",
+            "min_steel_in_long_dim": f"{round(self.min_steel_area_long, 3)} sq in",
+            "min_steel_in_short_dim": f"{round(self.min_steel_area_short, 3)} sq in",
         }
 
         return d
 
     def __str__(self):
         """ """
-        return f"Footing dimensions: {self.dims} ft\nDepth: {round(self.h, 2)} ft\nMinimum Required Steel Along {max(self.dims)} ft Direction: {round(self.min_steel_area, 2)} sqin\nMinimum Required Steel Along {min(self.dims)} ft Direction: {round(self.min_steel_area_short, 2)} sqin"
+        return f"Footing dimensions: {self.dims} ft\nDepth: {round(self.h, 2)} ft\nMinimum Required Steel Along {max(self.dims)} ft Direction: {round(self.min_steel_area_long, 2)} sqin\nMinimum Required Steel Along {min(self.dims)} ft Direction: {round(self.min_steel_area_short, 2)} sqin"
