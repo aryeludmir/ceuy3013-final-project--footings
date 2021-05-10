@@ -16,7 +16,6 @@ for i in data:
     f_c = i["f_c"]
     grade = i["grade"]
     a_s_p = i["a_s_p"]
-    bar_coat = i["bar_coat"]
     w_c = i["w_c"] if i["w_c"] else 150
     w_e = i["w_e"] if i["w_e"] else 100
     bottom = i["bottom_of_ftng"] if i["bottom_of_ftng"] else 4
@@ -42,7 +41,6 @@ for i in data:
             grade,
             a_s_p,
             bottom,
-            bar_coat,
             conc_type,
             w_c,
             w_e,
@@ -52,14 +50,12 @@ for i in data:
         max_width = i["width_restriction"]
         col_loc = i["col_loc"] if i["col_loc"] else "interior"
         col_width = i["width"]
-        col_length = i["length"]
 
         footing = ColumnFooting(
             name,
             log,
             precision,
             col_width,
-            col_length,
             d_l,
             l_l,
             f_c,
@@ -67,7 +63,6 @@ for i in data:
             a_s_p,
             bottom,
             max_width,
-            bar_coat,
             col_loc,
             conc_type,
             w_c,
