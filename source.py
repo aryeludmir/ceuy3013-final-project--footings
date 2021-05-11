@@ -7,8 +7,8 @@ class Footing:
     This is the base (or parent) class for WallFooting and
     ColumnFooting classes.
 
-    This base class contains general varaiables and functions for
-    reinforced concrete footings. The subclasses WallFooting and ColumnFooting
+    This base class contains general varaiables and functions used in the design
+    of reinforced concrete footings. The subclasses WallFooting and ColumnFooting
     contain specific variables and functions that pertain to their respective
     footing types only.
 
@@ -21,8 +21,7 @@ class Footing:
     w_c : int
         density of concrete in pcf
     lam : float
-        lambda - a modification factor reflecting lower tensile strengths of
-        lightweight concrete relative to normal-weight conrete
+        lambda - a modification factor reflecting lower tensile strength
     beta_1 : float
         a factor that is a function of the strength of the concrete
     f_y : int
@@ -36,7 +35,38 @@ class Footing:
 
     Methods
     ------
-    TO DO...
+    set_lam(conc_type)
+        Finds the modification factor "lambda"
+    set_beta_1()
+        Finds the facror beta_1
+    get_steel_props(grade)
+        Gets two reinforcing steel properties
+    set_d(ftng_type, bar_size=8)
+        Calculates the footing's effective depth "d" in inches
+    net_asp(asp, w_e, bottom)
+        Calculates the net allowable soil pressure (ASP) in ksf
+    factored_soil_pressure(d_l, l_l, dimension)
+        Calculates factored soil pressure to be used for footing design
+    get_k_bar(m_u, phi, b)
+        Calculates the coefficient of resistance, k_bar
+    solve_for_rho(k_bar)
+        Calculates reinforcement ratio
+    get_phi(rho)
+        Calculates strength reduction factor
+    calc_reqd_steel(rho, b, ftng_type)
+        Calculates the minimum flexural reinforcement required by analysis
+    get_min_beam(b)
+        Calculates the minimum flexural reinforcement for nonprestressed beams
+    get_min_slab(b)
+        Calculates the minimum flexural reinforcement for slabs
+    def four_thirds_reqd(reqd_area)
+        Calculates 1.33 x reqd_area
+    get_min_reinforcing(b, reqd_area)
+        Calculates the governing minimum required steel for footing
+    round_up_to_precision(x, precision)
+        Rounds given number up to desired precision
+    round_up(x, n)
+        Rounds number up to 10**-n decimal
 
     """
 
@@ -79,7 +109,7 @@ class Footing:
             self.set_d("column")
 
     def set_lam(self, conc_type):
-        """Finds the modification factor "lambda".
+        """Finds the modification factor "lambda"
 
         To account for properties of lightweight concrete, a modification factor
         "lambda" is used as a multiplier for sqrt(f_c).
@@ -111,7 +141,7 @@ class Footing:
         return lam
 
     def set_beta_1(self):
-        """Finds the facror beta_1.
+        """Finds the facror beta_1
 
         beta_1 is a  factor that is a function of the strength of the concrete.
         See ACI 318-14 Sec 22.2.2.4.3
@@ -134,7 +164,7 @@ class Footing:
         return beta_1
 
     def get_steel_props(self, grade):
-        """Gets two reinforcing steel properties.
+        """Gets two reinforcing steel properties
 
         The properties are f_y : yield strength in psi; epsilon_y : yield strain
 
@@ -163,7 +193,7 @@ class Footing:
         return f_y, epsilon_y
 
     def set_d(self, ftng_type, bar_size=8):
-        """Calculates the footing's effective depth "d" in inches.
+        """Calculates the footing's effective depth "d" in inches
 
         "d" is the centroid of the reinforcing steel bars. For a good approximation,
         a bar size diameter of 8 inches is assumed for a defualt value.
@@ -192,7 +222,7 @@ class Footing:
             f"Caluclate d for footing thickness h = {round(self.h, 3)} ft...\n-> d = {round(self.d, 2)} in.\n")
 
     def net_asp(self, asp, w_e, bottom):
-        """Calculates the net allowable soil pressure (ASP) in ksf.
+        """Calculates the net allowable soil pressure (ASP) in ksf
 
         Paramaters
         ----------
@@ -222,7 +252,7 @@ class Footing:
         return net_asp
 
     def factored_soil_pressure(self, d_l, l_l, dimension):
-        """Calculates factored soil pressure to be used for footing design.
+        """Calculates factored soil pressure to be used for footing design
 
         The factored soil pressure is calculated using factors found
         in ACI 318-14 Sec 5.3.1 equation b.
@@ -499,11 +529,8 @@ class Footing:
     def round_up_to_precision(self, x, precision):
         """ Rounds given number up to desired precision
 
-        Note that 0.5 is the default precision.
-        Example:
-        x = 11'-2" (11.1667 ft), precision = 0.3333333.
-        Goal -> round up so that 11.xx = 11'-4", 11'-6" (default), 11'-8", 12'-0"
-        Returns 11.333 ft (11'-4")
+        Note that 0.5 is an automatic precision value.
+        See Examples for further explanation
 
         Parameters
         ----------
@@ -516,6 +543,17 @@ class Footing:
         --------
         float
             x rounded up to desired precision
+
+        Examples
+        ---------
+        >>> x = 11.1666667
+        >>> precision = 0.3333333
+        >>> print(round_up_to_precision(x, precision))
+        11.3333334
+        >>> x = 11.4
+        >>> print(round_up_to_precision(x, precision))
+        11.5
+
 
         """
         # first get ceiling of x
@@ -548,6 +586,14 @@ class Footing:
         -------
         float
             x rounded up to 10**-n decimal
+
+        Examples
+        ---------
+        >>> x = 0.0033255511299842967
+        >>> n = 4
+        >>> print(round_up(x, n))
+        0.0034
+
         """
 
         # multiply x by 10 to nth power, ceiling it, then divide back
@@ -555,10 +601,32 @@ class Footing:
 
 
 class WallFooting(Footing):
-    """TO DO...
+    """A subclass of base class Footing. This class contains variables
+    and functions that pertain to the design process of wall footings only
+
+    Attributes
+    ----------
+    width : float
+        footing width
+    min_steel_area : float
+        minimum required steel are in square in per ft of wall
+
+    Methods
+    ------
+    design_wall_footing(precision, wall_width, wall_type, d_l, l_l, a_s_p, bottom, w_e)
+        Designs wall footing parameters and checks adequacy
+    get_req_width(d_l, l_l, a_s_p, w_e, bottom, precision)
+        Calculates required width of wall footing, rounded up to desired precision.
+    check_one_way_shear(q_u, req_width, wall_width)
+        Checks one-way (beam) shear for wall footing
+    get_steel_reqd(q_u, wall_width, wall_type)
+        Calculates bending moment and reinforcement ratio
+    ftng_dict()
+        Dictionary of final footing design
+
     """
 
-    def __init__(self, name, log, precision, wall_width, wall_type, d_l, l_l, f_c, grade, a_s_p, bottom, conc_type, w_c, w_e,):
+    def __init__(self, name, log, precision, wall_width, wall_type, d_l, l_l, f_c, grade, a_s_p, bottom, conc_type, w_c, w_e):
         """TO DO...
         """
         super().__init__(name, log, f_c, w_c, conc_type, grade, "wall")
@@ -778,7 +846,34 @@ class WallFooting(Footing):
 
 
 class ColumnFooting(Footing):
-    """TO DO...
+    """A subclass of base class Footing. This class contains variables
+    and functions that pertain to the design process of column footings only
+
+    Attributes
+    ----------
+    length : float
+        footing length (ft)
+    width : float
+        footing width (ft)
+    min_steel_area_length : float
+        minimum required steel area parallel to length of footing (square in.)  
+    min_steel_area_width : float
+        minimum required steel area parallel to width of footing (square in.)
+
+    Methods
+    ------
+    design_column_footing(precision, col_width, d_l, l_l, a_s_p, bottom, width_restriction, col_loc, w_e)
+        Designs column footing parameters and checks adequacy
+    get_dimensions(d_l, l_l, a_s_p, w_e, bottom, max_width, precision)
+        Calculates footing dimensions required rounded up to desired precision.
+    check_two_way_shear(q_u, area, width, col_loc)
+        Checks two way (punching) shear for column footing
+    check_one_way_shear(q_u, col_size)
+        Checks one-way (beam) shear for column footing
+    get_steel_reqd(q_u, l, w)
+        Calculates bending moment and reinforcement ratio
+    ftng_dict()
+        Dictionary of final footing design
     """
 
     def __init__(self, name, log, precision, col_width, d_l, l_l, f_c, grade, a_s_p, bottom, width_restriction, col_loc, conc_type, w_c, w_e):
@@ -794,7 +889,7 @@ class ColumnFooting(Footing):
             precision, col_width, d_l, l_l, a_s_p, bottom, width_restriction, col_loc, w_e)
 
     def design_column_footing(self, precision, col_width, d_l, l_l, a_s_p, bottom, width_restriction, col_loc, w_e):
-        """ Designs wall footing parameters and checks adequacy
+        """ Designs column footing parameters and checks adequacy
 
         Parameters
         ----------

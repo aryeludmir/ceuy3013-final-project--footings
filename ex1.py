@@ -28,46 +28,14 @@ for i in data:
     if ftng_type == "wall":
         wall_type = i["wall_type"]
         wall_width = i["width"]
-
-        footing = WallFooting(
-            name,
-            log,
-            precision,
-            wall_width,
-            wall_type,
-            d_l,
-            l_l,
-            f_c,
-            grade,
-            a_s_p,
-            bottom,
-            conc_type,
-            w_c,
-            w_e,
-        )
-
+        footing = WallFooting(name, log, precision, wall_width, wall_type,
+                              d_l, l_l, f_c, grade, a_s_p, bottom, conc_type, w_c, w_e)
     else:
         max_width = i["width_restriction"]
         col_loc = i["col_loc"] if i["col_loc"] else "interior"
         col_width = i["width"]
-
-        footing = ColumnFooting(
-            name,
-            log,
-            precision,
-            col_width,
-            d_l,
-            l_l,
-            f_c,
-            grade,
-            a_s_p,
-            bottom,
-            max_width,
-            col_loc,
-            conc_type,
-            w_c,
-            w_e,
-        )
+        footing = ColumnFooting(name, log, precision, col_width, d_l, l_l, f_c,
+                                grade, a_s_p, bottom, max_width, col_loc, conc_type, w_c, w_e)
 
     print(footing)
 
