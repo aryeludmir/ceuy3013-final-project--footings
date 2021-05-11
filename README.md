@@ -4,8 +4,8 @@
 
 ### Project Purpose
 
-This project is meant as a design aid for reinforced concrete footings. for students and professionals alike.
-(K, fine. Not really for professionals, but it sounded good). The project consists of a [source.py] (https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/source.py)
+This project is meant as a design aid for reinforced concrete footings, and can be used by students and professionals alike.
+(K, fine. Not really for professionals, but it sounded good). The project consists of a [source.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/source.py) file which packages all three classes used in the [ex1.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/ex1.py) script. To run this program, download this [GitHub repository](https://github.com/aryeludmir/ceuy3013-final-project--footings.git), follow the guidelines below when inputting the data, and run the command `python ex1.py`.
 
 #### Input
 #### Output
