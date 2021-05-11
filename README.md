@@ -1,7 +1,13 @@
-# ceuy3013-final-project--footings
-This is my submission the Final Project in CEUY 3013 Spring 2021. This program aids in the design of concentrically loaded reinforced concrete footings.
+# CE-UY 3013 Final Project
+## Reinforced Concrete Footing Design Aid
+### Project Purpose
+#### Input
+#### Output
+### Limitations
+#### Limited Input
+#### Limited Output
 
-# CE-UY 3013 Project Template
+
 
 *This file presents a description of the final project. For your submission,*
 *this file must serve as the documentation of your project, how your program*
@@ -10,25 +16,6 @@ This is my submission the Final Project in CEUY 3013 Spring 2021. This program a
 This is the final project template for *CE-UY 3013 Computing In Civil Engineering*.
 Your project must follow this template and must be hosted on GitHub. Pay
 attention to the contents of this repository.
-
-```
-.
-├── input (optional)
-│   └── README.md
-├── output (optional)
-│   └── README.md
-├── .gitignore
-├── README.md
-├── requirements.txt
-├── source.py
-└── test.py
-```
-
-Your project must have exactly the same structure, with exactly the same
-file names, except for the ``input`` and ``output`` directories that are
-optional and should only be used if you write a program that processes
-one or more data files. Here are two examples of proper use of the input and
-output directories: [ex1](https://github.com/InsightDataScience/Purchase-Analytics), [ex2](https://github.com/InsightDataScience/h1b_statistics)
 
 
 ## Requirements

@@ -38,7 +38,6 @@ for i in data:
                                 grade, a_s_p, bottom, max_width, col_loc, conc_type, w_c, w_e)
 
     print(footing)
-
     results_list.append(footing.ftng_dict())
 
 with open("output/output.json", "w") as outfile:
