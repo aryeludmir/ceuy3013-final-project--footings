@@ -71,7 +71,7 @@ for i in data:
 
     print(footing)
 
-    results_list.append(footing.get_ftng_dict())
+    results_list.append(footing.ftng_dict())
 
 with open("output/output.json", "w") as outfile:
     json.dump(results_list, outfile, indent=4)
