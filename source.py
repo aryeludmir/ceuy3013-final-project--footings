@@ -71,7 +71,7 @@ class Footing:
     """
 
     def __init__(self, name, log, f_c, w_c, conc_type, grade, ftng_type):
-        """ This is the constructor for Footing class.
+        """ Constructor for Footing class.
 
         Parameters
         ----------
@@ -627,12 +627,44 @@ class WallFooting(Footing):
     """
 
     def __init__(self, name, log, precision, wall_width, wall_type, d_l, l_l, f_c, grade, a_s_p, bottom, conc_type, w_c, w_e):
-        """TO DO...
+        """ Constructor for WallFooting class.
+
+        Parameters
+        ----------
+        name : str
+            footing identifier
+        log : _io.TextIOWrapper
+            output file for design process steps
+        precision : float
+            precsion to round up to in footing design
+        wall_width : float
+            width of wall (inches)
+        wall_type : str
+            type of wall (concrete or masonry)
+        d_l : float
+            dead load (kips/ft)
+        l_l : float
+            live load (kips/ft)
+        f_c : float
+            concrete compressive strength (psi)
+        grade : int
+            reinforcinfg steel grade designation
+        a_s_p : float
+            allowable soil pressure (psi)
+        bottom : float
+            bottom of footing relative to earth surface
+        conc_type : str
+            concrete type (normal weight, lightweight, or sand_lightweight)
+        w_c : float
+            conrete density (pcf)
+        w_e : float
+            earth density (pcf)
+
         """
+
         super().__init__(name, log, f_c, w_c, conc_type, grade, "wall")
         self.width = 0
         self.min_steel_area = 0
-
         self.design_wall_footing(
             precision, wall_width, wall_type, d_l, l_l, a_s_p, bottom, w_e)
 
@@ -839,10 +871,7 @@ class WallFooting(Footing):
         return d
 
     def __str__(self):
-        return f"\
-        Footing width: {round(self.width, 2)} ft\n\
-        Depth: {round(self.h, 2)} ft\n\
-        Minimum Required Steel: {round(self.min_steel_area, 2)} sqin/ft"
+        return f"{self.ftng_dict()}"
 
 
 class ColumnFooting(Footing):
@@ -877,14 +906,47 @@ class ColumnFooting(Footing):
     """
 
     def __init__(self, name, log, precision, col_width, d_l, l_l, f_c, grade, a_s_p, bottom, width_restriction, col_loc, conc_type, w_c, w_e):
-        """TO DO...
+        """ Constructor for ColumnFooting class.
+
+        Parameters
+        ----------
+        name : str
+            footing identifier
+        log : _io.TextIOWrapper
+            output file for design process steps
+        precision : float
+            precsion to round up to in footing design
+        col_width : float
+            width of column (inches)
+        d_l : float
+            dead load (kips/ft)
+        l_l : float
+            live load (kips/ft)
+        f_c : float
+            concrete compressive strength (psi)
+        grade : int
+            reinforcinfg steel grade designation
+        a_s_p : float
+            allowable soil pressure (psi)
+        bottom : float
+            bottom of footing relative to earth surface
+        width_restriction : float
+            maximum width of footing
+        col_loc : str
+            column location on footing (interior, edge, corner)
+        conc_type : str
+            concrete type (normal weight, lightweight, or sand_lightweight)
+        w_c : float
+            conrete density (pcf)
+        w_e : float
+            earth density (pcf)
+
         """
         super().__init__(name, log, f_c, w_c, conc_type, grade, "column")
         self.length = 0
         self.width = 0
         self.min_steel_area_width = 0
         self.min_steel_area_length = 0
-
         self.design_column_footing(
             precision, col_width, d_l, l_l, a_s_p, bottom, width_restriction, col_loc, w_e)
 
@@ -1235,8 +1297,4 @@ class ColumnFooting(Footing):
         return d
 
     def __str__(self):
-        return f"\
-        Footing dimensions: {self.length} ft x {self.width} ft\n\
-        Depth: {round(self.h, 2)} ft\n\
-        Minimum Required Steel Along {self.length} ft Direction: {round(self.min_steel_area_length, 2)} sqin\n\
-        Minimum Required Steel Along {self.width} ft Direction: {round(self.min_steel_area_width, 2)} sqin"
+        return f"{self.ftng_dict()}"
