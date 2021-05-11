@@ -1,21 +1,17 @@
 # CE-UY 3013 Final Project
+
 ## Reinforced Concrete Footing Design Aid
+
 ### Project Purpose
+
+This project is meant as a design aid for reinforced concrete footings. for students and professionals alike.
+(K, fine. Not really for professionals, but it sounded good). The project consists of a [source.py] https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/source.py
+
 #### Input
 #### Output
 ### Limitations
 #### Limited Input
 #### Limited Output
-
-
-
-*This file presents a description of the final project. For your submission,*
-*this file must serve as the documentation of your project, how your program*
-*should be used along with examples.*
-
-This is the final project template for *CE-UY 3013 Computing In Civil Engineering*.
-Your project must follow this template and must be hosted on GitHub. Pay
-attention to the contents of this repository.
 
 
 ## Requirements
