@@ -4,71 +4,55 @@
 
 ### Project Purpose
 
-This project is meant as a design aid for reinforced concrete footings, and can be used by students and professionals alike.
-(K, fine. Not really for professionals, but it sounded good). The project consists of a [source.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/source.py) file which packages all three classes used in the [ex1.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/ex1.py) script. To run this program, download this [GitHub repository](https://github.com/aryeludmir/ceuy3013-final-project--footings.git), follow the guidelines below when inputting the data, and run the command `python ex1.py`.
+This project is meant as a design aid for reinforced concrete footings, and 
+can be used by students and professionals alike. (K, fine. Not really for 
+professionals, but it sounded good). The project consists of a 
+[source.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/source.py)
+file, which packages all three classes used in the 
+[ex1.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/ex1.py)
+script, (said ex1.py file), and 
+[this](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/input/ex1.json)
+json file. To run this program, download this
+[GitHub repository](https://github.com/aryeludmir/ceuy3013-final-project--footings.git),
+follow the guidelines below when inputting the data, and run the command `python ex1.py`. 
+<br />
+<br />
+*Note this program does not have any external dependencies. All you need is the
+GitHub repository this README.md is part of.*
 
 #### Input
+To use this program, simply change the inputs of
+[ex1.json](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/input/ex1.json)
+to reflect the given data.
+<br />
+<br />
+***This json file must remain in the input folder it is currently in.***
+(Unless you change the script file, 
+[ex1.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/ex1.py)).
+<br />
+<br />
+***The input must have the same syntax as the following:***
+<br />
+```python
+{
+        "id": "col_175_175_7",
+        "ftng_type": "column",
+        "width": 18.0,
+        "dead_load": 175.0,
+        "live_load": 175.0,
+        "conc_type": "nw",
+        "w_c": 150.0,
+        "w_e": 100.0,
+        "f_c": 3000.0,
+        "grade": 60,
+        "a_s_p": 5000.0,
+        "bottom_of_ftng": 4.0,
+        "wall_type": null,
+        "width_restriction": 7.0,
+        "col_loc": "interior",
+        "precision": 0.5
+    }
+```
 #### Output
 ### Limitations
-#### Limited Input
-#### Limited Output
-
-
-## Requirements
-
-*Python 3 projects only, no Python 2.*
-
-This will be a solo project, the requirements are such that can be comfortably
-handled by a single student. The goal is to write a program that performs a
-series of **meaningful** tasks within Civil Engineering and can be easily used
-by others. This requires code that is clean, comprehensible, does not return
-unexpected errors and is accompanied by sufficient documentation.
-
-What is a *meaningful* task? There is really no need to overthink this. In this
-course we looked at examples from structural analysis, pile foundations,
-traffic engineering and more. In other courses you were introduced to the
-methods and processes governing environmental engineering, steel design, concrete design, engineering mechanics, project management, fluid mechanics, water resources
-engineering, geotechnical engineering and much more. These methods and processes
-involve a series of manual calculations and checks considering multiple parameters.
-
-If I asked you to produce a flowchart of the process you followed in most of the
-assignments you have tackled so far in this program, you would have done so
-without much trouble. My point here is that you have been working with algorithms
-for quite some time already, now is the time to pick one of significant value and
-complexity and implement it in Python. From my experience, any analytical
-process that relies on a reference manual can be implemented in Python.
-
-You will have to submit your project proposal for approval first. Do so ASAP on
-NYU Classes. All projects must be unique, rule of dibs applies.
-
-
-## Grading
-
-* Practicality: 30%
-* Execution: 50%
-* Documentation and examples: 20%
-
-**Practicality:** Use common sense, this is an assignment that weighs 20% on your
-final grade, a simple program won't cut it. Use your combined effort on all class
-assignments as a reference (they also weigh 20% on your grade) Focus on preparing
-a thorough project proposal so that your instructor can comment on the usefulness
-of your project. At the same time, think how your project will benefit yourself
-and your colleagues (i.e. will this tool make you more efficient with your
-coursework? is this a tool that simplifies tedious and error-prone calculations?
-does this tool produce visualizations?)
-
-**Execution:** Clean, error-free code with lots of comments is key. Once again,
-use common sense: it is probably best to make it easy for the grader to go
-through the code than have them struggle to understand what's happening.
-Absolutely no unexpected errors, make sure to test your code before submitting.
-
-**Documentation and examples:** This README file presents the project description
-right now but for your project it must provide a detailed description of your
-program, and how it should be used with examples. Make sure to check this
-[Markdown guide](https://guides.github.com/features/mastering-markdown/)
-for tips on how to better present your work.
-
-
-Your submission will go undergo several plagiarism checks. There is risk of a
-failing score, without warning, if it becomes evident that your code comes from
-other public projects.
+The progrm has many limitations only some of which are mentioned here.
