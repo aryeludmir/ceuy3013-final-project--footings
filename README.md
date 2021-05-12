@@ -80,7 +80,7 @@ These are optional with default values of `150` and `100` pcf respectively.
 * `"grade"` is the reinforcing steel grade.
 * `"a_s_p"` ia the allowable soil pressure in psi.
 * `"bottom_of_ftng"` is the bottom of the footing relative to 
-the earth's surface in ft. This is optional with a defaukt value of `4` ft.
+the earth's surface in ft. This is optional with a default value of `4` ft.
 * `"wall_type"`. This only needs to have a value (other than null) if we are 
 dealing with a wall footing. The two possible values are `"concrete"` and `"masonry"`.
 <br />***NOTE*** that if nothing is entered for `"wall_type"` and it is a wall
