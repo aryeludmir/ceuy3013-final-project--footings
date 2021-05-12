@@ -3,26 +3,26 @@
         "id": "wall_10_20",
         "ftng_width": "6.667 ft",
         "ftng_depth": "1.5 ft",
-        "min_steel": "0.58 sq in per ft"
+        "minimum_steel": "0.58 sq in per ft"
     },
     {
         "id": "wall_6_15",
         "ftng_width": "6 ft",
         "ftng_depth": "1.25 ft",
-        "min_steel": "0.44 sq in per ft"
+        "minimum_steel": "0.44 sq in per ft"
     },
     {
         "id": "col_225_175",
         "ftng_dimensions": "9.5 ft x 9.5 ft",
         "ftng_depth": "2 ft",
-        "min_steel_in_long_dim": "7.296 sq in",
-        "min_steel_in_short_dim": "7.296 sq in"
+        "minimum_steel_length": "7.296 sq in",
+        "minimum_steel_width": "7.296 sq in"
     },
     {
         "id": "col_175_175_7",
         "ftng_dimensions": "11.5 ft x 7.0 ft",
         "ftng_depth": "2.083 ft",
-        "min_steel_in_long_dim": "5.998 sq in",
-        "min_steel_in_short_dim": "6.21 sq in"
+        "minimum_steel_length": "5.998 sq in",
+        "minimum_steel_width": "6.21 sq in"
     }
 ]
