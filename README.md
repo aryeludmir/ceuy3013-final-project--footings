@@ -12,7 +12,7 @@ file, which packages all three classes used in the
 [ex1.py](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/ex1.py)
 script, (said ex1.py file), and 
 [this](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/input/ex1.json)
-json file. To run this program, download this
+JSON file. To run this program, download this
 [GitHub repository](https://github.com/aryeludmir/ceuy3013-final-project--footings.git),
 follow the guidelines below when inputting the data, and run the command `python ex1.py`-
 *make sure you're in the project directory*. 
@@ -98,5 +98,7 @@ possible inputs are `"interior"` - this is the default value - `"edge"` and `"co
  default precision is `0.08333333333`, or 1/12 of a foot.
 
 #### Output
+TO DO...
 ### Limitations
 The program has many limitations only some of which are mentioned here.
+TO DO...
