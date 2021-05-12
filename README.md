@@ -109,7 +109,7 @@ The first output will be similar to
 The file will contain a list of footing design dictionaries, one for each footing.
 The `key:value` pairs are slightly different for walls and columns. Below is a sample
 of a column output 
-([`click here`](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/output/output.json)
+([click here](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/output/output.json)
 for a full sample file including wall footings):
 ```python
 [       
@@ -122,12 +122,22 @@ for a full sample file including wall footings):
     }
 ]
 ```
-Note that in the case above the footing is rectangular, so the minimum steel area
-for the length and width are different. In case of a square column, the`keys`
+Note that in the case above, the footing is rectangular, so the minimum steel area
+for the length and width are different. In case of a square column, the `keys`
 will remain the same even though the length will be the same as the width. For walls,
 there will only be one dimension (width), hence there will only be one required steel
 `key:value` pair.
 ##### Output 2
+The second output is a text file. Each footing will have its own designated text file
+with naming convention `id.txt`. (Say the input had `"id" : "col_200_124"`, the text file for that footing
+would be `col_200_124.txt`).<br /> 
+This second output goes step by step through the design process. The file indicates
+what is being claculated (say, `Calculating effective depth d`) and then prints the value 
+(`d = 20 in.`). For a complete example text file, check out 
+[col_175_175_7.txt](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/output/col_175_175_7.txt).
+<br /> 
+<br /> 
+Both outputs wil be in the output directory located in the program directory.
 ### Limitations
 The program has many limitations only some of which are mentioned here.
 TO DO...
