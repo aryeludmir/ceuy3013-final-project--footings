@@ -69,13 +69,17 @@ which column is being designed.
 * `"width"` is the width if the wall or column in inches. Note that
 for both walls *and* columns there is only one dimension input. *This
 program only works for square cloumns*.
-* `"dead_load"` and `"live_load"` are just that. For walls they're in 
-kips/ft of wall, for columns they are just in kips.
+* `"dead_load"` is in kips/ft of wall for wall footings, and kips for 
+ column footings.
+* `"live_load"` is in kips/ft of wall for wall footings, and kips for 
+column footings.
 * `"conc_type"` is the concrete type. The three possible inputs are 
 `"nw"`, `"lw"` and `"s_lw"`, for normal-weight, lightweight, and sand-lightweight
 concrete respectively. This is optional and the default value is `"nw"`.
-* `"w_c"` and `"w_e"` are the densities of concrete (w_c) and earth (w_e) in pcf.
-These are optional with default values of `150` and `100` pcf respectively.
+* `"w_c"` is the density of concrete in pcf. This is optional with default 
+ value of 150.0.
+* `"w_e"` is the density of earth in pcf. This is optional with default 
+ value of 100.0.
 * `"f_c"`, is the concrete compressive strength in psi.
 * `"grade"` is the reinforcing steel grade.
 * `"a_s_p"` ia the allowable soil pressure in psi.
