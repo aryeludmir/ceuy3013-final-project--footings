@@ -865,7 +865,7 @@ class WallFooting(Footing):
             "id": self.name,
             "ftng_width": f"{round(self.width, 3)} ft",
             "ftng_depth": f"{round(self.h, 3)} ft",
-            "min_steel": f"{round(self.min_steel_area, 2)} sq in per ft",
+            "minimum_steel": f"{round(self.min_steel_area, 2)} sq in per ft",
         }
 
         return d
@@ -1290,8 +1290,8 @@ class ColumnFooting(Footing):
             "id": self.name,
             "ftng_dimensions": f"{self.length} ft x {self.width} ft",
             "ftng_depth": f"{round(self.h, 3)} ft",
-            "min_steel_in_long_dim": f"{round(self.min_steel_area_length, 3)} sq in",
-            "min_steel_in_short_dim": f"{round(self.min_steel_area_width, 3)} sq in",
+            "minimum_steel_length": f"{round(self.min_steel_area_length, 3)} sq in",
+            "minimum_steel_width": f"{round(self.min_steel_area_width, 3)} sq in",
         }
 
         return d
