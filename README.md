@@ -123,7 +123,7 @@ for a full sample file including wall footings):
 ]
 ```
 Note that in the case above the footing is rectangular, so the minimum steel area
-for the length and width are are different. In case of a square column, the`'keys`
+for the length and width are different. In case of a square column, the`'keys`
 will remain the same even though the length will be the same as the width. For walls,
 there will only be one dimension (width), hence there will only be one required steel
 `key : value` pair.
