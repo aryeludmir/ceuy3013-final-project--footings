@@ -135,9 +135,21 @@ This second output goes step by step through the design process. The file indica
 what is being claculated (say, `Calculating effective depth d`) and then prints the value 
 (`d = 20 in.`). For a complete example text file, check out 
 [col_175_175_7.txt](https://github.com/aryeludmir/ceuy3013-final-project--footings/blob/main/output/col_175_175_7.txt).
-<br /> 
-<br /> 
-Both outputs wil be in the output directory located in the program directory.
+<br /><br /> 
+Both outputs wil be in the output directory located in the program folder.
 ### Limitations
-The program has many limitations only some of which are mentioned here.
-TO DO...
+*The program (probably) has many more limitations than are mentioned here.*
+<br /><br />
+* **Limitation 1**: As mentioned above, column footings can only be designed
+for **square** columns. If you would like to design a column with different side dimensions, 
+this program is useless.
+* **Limitation 2**: The program only determines the required area of steel needed for the footing - 
+it does not determine what number bar and how many to use. Besides for the simple drawback of not completing
+the design, the user will then have to calculate the edevelopment length on their own, 
+and determine the need for hooks. Hence, this program does not fully automate the 
+design.
+* **Limitation 3**: This program does not determine the bearing strength
+of the footing or the column. This may also at times be a tedious process
+for the user -- and an essential one.
+<br /><br />
+Of course, there are other limitations, but they are beyond the scope of this document.
