@@ -138,8 +138,8 @@ what is being claculated (say, `Calculating effective depth d`) and then prints 
 <br /><br /> 
 Both outputs wil be in the output directory located in the program folder.
 ### Limitations
-<br />
-**Limitation 1**: As mentioned above, column footings can only be designed
+
+* **Limitation 1**: As mentioned above, column footings can only be designed
 for **square** columns. If you would like to design a column with different side dimensions, 
 this program is useless.
 * **Limitation 2**: The program only determines the required area of steel needed for the footing - 
