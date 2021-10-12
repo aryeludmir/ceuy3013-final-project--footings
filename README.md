@@ -55,7 +55,7 @@ to reflect the given data. ***This JSON file must have this same name and filepa
 ```
 The order of the above dictionary, as well as the input values, need not 
 be the same, but all the *keys* seen above must be included. Adding your
-own keys won't affect the program's functionality, but it won't do anything either.
+own keys won't negatively affect the program's functionality, but it won't help either.
 The is no limit to the amount of dictionaries (separate footing design criteria) 
 that can be placed in the list.
 <br />
